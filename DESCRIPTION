@@ -18,3 +18,5 @@ Imports:
     parallel,
     RColorBrewer,
     stats
+URL: https://github.com/mishashe/segmut
+BugReports: https://github.com/mishashe/segmut/issues
