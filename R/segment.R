@@ -30,6 +30,7 @@ pVal <- function(par,muts,L=max(muts)-min(muts)+1,Kmin=0)
     pVal <- pVal + stats::pnorm(abs(n1/K1-n2/K2), mean = 0, sd = sqrt(tau/K1+tau/K2), lower.tail=FALSE, log.p = TRUE)
     n1 <- n2
     K1 <- K2
+    # fdghdf
   }
   return(pVal/length(par))
 }
