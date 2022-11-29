@@ -26,16 +26,11 @@ This is a basic example which shows you how to solve a common problem:
 
 To load nessesary libraries:
 
-``` r
-library(segmut)
-library(DEoptim)
-#> Loading required package: parallel
-#> 
-#> DEoptim package
-#> Differential Evolution algorithm in R
-#> Authors: D. Ardia, K. Mullen, B. Peterson and J. Ulrich
-library(RColorBrewer)
-```
+    #> Loading required package: parallel
+    #> 
+    #> DEoptim package
+    #> Differential Evolution algorithm in R
+    #> Authors: D. Ardia, K. Mullen, B. Peterson and J. Ulrich
 
 To generate example of genome of length L with vector of mutation
 locations muts:
