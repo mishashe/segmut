@@ -9,7 +9,8 @@
 #'
 #' @return results of the DE optimization
 #' @export
-getBreaks <- function(muts,L=max(muts)-min(muts)+1,Kmin=0,n)
+#'
+getBreaks <- function(muts,L=max(muts)-min(muts)+1,Kmin=0,n=1)
 {
   res <- DEoptim(pVal, lower = rep(0,n), upper = rep(L,n),
                  control = DEoptim.control(trace = 0),
