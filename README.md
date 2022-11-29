@@ -43,17 +43,19 @@ muts <- sort(c(sample(1:3000,400),sample(3001:8000,250),sample(8001:10000,400)))
 To find optimal breaks given n=2 number of breaks
 
 ``` r
-# res <- getBreaks(muts = muts, L = L, Kmin=0, n=2)
+res <- getBreaks(muts = muts, L = L, Kmin=0, n=2)
 ```
 
 To plot the results
 
 ``` r
-# breaks <- sort(c(0,res$optim$bestmem,L))
-# colors <- brewer.pal(name="Paired", n=length(breaks)-1)
-# plot(muts,rep(0,length(muts)),pch=".")
-# for (i in 1:(length(breaks)-1))
-# {
-#   lines(c(breaks[i],breaks[i+1]),c(-0.05,-0.05),col=colors[i], lwd=5)
-# }
+breaks <- sort(c(0,res$optim$bestmem,L))
+colors <- brewer.pal(name="Paired", n=length(breaks)-1)
+plot(muts,rep(0,length(muts)),pch=".")
+for (i in 1:(length(breaks)-1))
+{
+  lines(c(breaks[i],breaks[i+1]),c(-0.05,-0.05),col=colors[i], lwd=5)
+}
 ```
+
+<img src="man/figures/README-plot results-1.png" width="100%" />
