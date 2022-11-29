@@ -1,9 +1,8 @@
 ---
 title: "segmut"
-
 output: 
-  html_document: default
   github_document: default
+  html_document: default
 date: "`r Sys.Date()`"
 ---
 

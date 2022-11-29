@@ -4,7 +4,7 @@ segmut
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# segmut
+# Package description
 
 <!-- badges: start -->
 <!-- badges: end -->
@@ -35,13 +35,13 @@ library(DEoptim, quietly=T) # to find optimal break points using differential ev
 library(RColorBrewer, quietly=T) # to plot results
 ```
 
-## Example with known number of breaks n=2
+## Example with known number of breaks `n=2`
 
-This is a basic example which shows you how to find positions of n=2
+This is a basic example which shows you how to find positions of `n=2`
 breaks:
 
-To generate example of genome of length L with vector of mutation
-locations muts:
+To generate example of genome of length `L` with vector of mutation
+locations `muts`:
 
 ``` r
 L <- 10000
