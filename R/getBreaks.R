@@ -12,7 +12,7 @@
 #'
 getBreaks <- function(muts,L=max(muts)-min(muts)+1,Kmin=0,n=1)
 {
-  res <- DEoptim(pVal, lower = rep(0,n), upper = rep(L,n),
+  res <- DEoptim(pValKS, lower = rep(0,n), upper = rep(L,n),
                  control = DEoptim.control(trace = 0),
                  muts=muts,L=L,Kmin=Kmin)
   return(res)

@@ -39,6 +39,12 @@ registerDoParallel(cores = ncores)
 library(rlist)
 ```
 
+To set parameters
+
+``` r
+Kmin <- 300
+```
+
 ## Example with known number of breaks `n=2`
 
 This is a basic example which shows you how to find positions of `n=2`
@@ -55,7 +61,7 @@ muts <- sort(c(sample(1:3000,3000*0.1),sample(3001:8000,5000*0.18),sample(8001:1
 To find optimal breaks locations given `n=2` number of breaks
 
 ``` r
-res <- getBreaks(muts = muts, L = L, Kmin=0, n=2)
+res <- getBreaks(muts = muts, L = L, Kmin=Kmin, n=2)
 ```
 
 To plot the results
@@ -84,13 +90,13 @@ one break and estimates *p*-value of the null model as the 5% quantile
 of this vector
 
 ``` r
-p0 <- get_p0(muts,L=L,Kmin=0,A=20)
+p0 <- get_p0(muts,L=L,Kmin=Kmin,A=20)
 ```
 
 Calculate p-value for `n=1`:
 
 ``` r
-res <- getBreaks(muts = muts, L = L, Kmin=0, n=1)
+res <- getBreaks(muts = muts, L = L, Kmin=Kmin, n=1)
 if (res$optim$bestval>p0) {print("There is no support even for a single break")} else
  {print("There is support for one break, let's test for more")}
 #> [1] "There is support for one break, let's test for more"
@@ -99,21 +105,38 @@ if (res$optim$bestval>p0) {print("There is no support even for a single break")}
 To find optimal number of breaks
 
 ``` r
-resList <- list(res,getBreaks(muts = muts, L = L, Kmin=0, n=2))
+resList <- list(res,getBreaks(muts = muts, L = L, Kmin=Kmin, n=2))
 imax <- length(resList)
 while (resList[[imax]]$optim$bestval < resList[[imax-1]]$optim$bestval) 
 {
-  resList <- list.append(resList, getBreaks(muts = muts, L = L, Kmin=0, n=length(resList)+1))
+  resList <- list.append(resList, getBreaks(muts = muts, L = L, Kmin=Kmin, n=length(resList)+1))
   imax <- length(resList)
   print(imax)
 }
 #> [1] 3
-#> [1] 4
-#> [1] 5
-#> [1] 6
-#> [1] 7
 p.values <- sapply(1:length(resList),function(i){resList[[i]]$optim$bestval})
 plot(1:length(resList),p.values)
 ```
 
 <img src="man/figures/README-find optimal number of breaks-1.png" width="100%" />
+
+``` r
+n <- which.min(p.values)
+res <- resList[[n]]
+```
+
+To plot the results
+
+``` r
+breaks <- sort(c(0,res$optim$bestmem,L))
+colors <- brewer.pal(name="Paired", n=length(breaks)-1)
+par(mar=c(2,0,0,0))
+plot(muts,rep(0,length(muts)),pch=".", cex = 1.5,ylim=c(-0.06,0.01),ylab="",xlab="", axes=F)
+axis(side=1, at=c(0,3000,8000,L))
+for (i in 1:(length(breaks)-1))
+{
+  lines(c(breaks[i],breaks[i+1]),c(-0.05,-0.05),col=colors[i], lwd=5)
+}
+```
+
+<img src="man/figures/README-plot best results-1.png" width="100%" />

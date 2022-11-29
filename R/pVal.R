@@ -12,7 +12,7 @@
 #'
 #' @examples
 #' pVal(par=c(3000,5000),muts =sort(c(sample(1:3000,400),sample(3001:8000,250),sample(8001:10000,400))),L=10000,Kmin=0)
-pVal <- function(par,muts,L=max(muts)-min(muts)+1,Kmin=0)
+pValGeometric <- function(par,muts,L=max(muts)-min(muts)+1,Kmin=0)
 {
   xB <- c(0,sort(par),L)
   if (any(diff(xB)<Kmin)) return(0)
@@ -33,5 +33,31 @@ pVal <- function(par,muts,L=max(muts)-min(muts)+1,Kmin=0)
 }
 
 
+
+#' calculates geometrically averaged p-value
+#'
+#' @description calculates geometrically averaged p-value given breakpoints.
+#'
+#' @param par vector of breakpoints
+#' @param muts vector of mutations locations
+#' @param L length of locus
+#' @param Kmin minimal length of a segment
+#'
+#' @return p-value of all breakpoints after harmonic mean
+#' @export
+#'
+#' @examples
+#' pVal(par=c(3000,5000),muts =sort(c(sample(1:3000,400),sample(3001:8000,250),sample(8001:10000,400))),L=10000,Kmin=0)
+pValKS <- function(par,muts,L=max(muts)-min(muts)+1,Kmin=0)
+{
+  xB <- c(0,sort(par),L)
+  if (any(diff(xB)<Kmin)) return(0)
+  pVal <- 0
+  for (i in 1:(length(xB)-1))
+  {
+    pVal <- pVal + log10(ks.test(muts[(muts>=xB[i] & muts<=xB[i+1])],"punif",xB[i],xB[i+1])$p.value)
+  }
+  return(pVal)
+}
 
 
