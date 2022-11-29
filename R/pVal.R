@@ -29,7 +29,8 @@ pVal <- function(par,muts,L=max(muts)-min(muts)+1,Kmin=0)
     n1 <- n2
     K1 <- K2
   }
-  return(pVal/length(par))
+  # return(pVal/length(par))
+  return(pVal)
 }
 
 

@@ -33,11 +33,10 @@ library(DEoptim, quietly=T) # to find optimal break points using differential ev
 #> Differential Evolution algorithm in R
 #> Authors: D. Ardia, K. Mullen, B. Peterson and J. Ulrich
 library(RColorBrewer, quietly=T) # to plot results
-library(doParallel)
-#> Loading required package: foreach
-#> Loading required package: iterators
-ncores <- 4
+library(doParallel, quietly=T)
+ncores <- 4 # set to desired number of cores for parallel computation
 registerDoParallel(cores = ncores)
+library(rlist)
 ```
 
 ## Example with known number of breaks `n=2`
@@ -50,7 +49,7 @@ locations `muts`:
 
 ``` r
 L <- 10000
-muts <- sort(c(sample(1:3000,3000*0.1),sample(3001:8000,5000*0.15),sample(8001:10000,2000*0.12)))
+muts <- sort(c(sample(1:3000,3000*0.1),sample(3001:8000,5000*0.18),sample(8001:10000,2000*0.12)))
 ```
 
 To find optimal breaks locations given `n=2` number of breaks
@@ -80,22 +79,36 @@ for (i in 1:(length(breaks)-1))
 This is a basic example which shows you how to find optimal number of
 breaks and their locations:
 
-Gets log10 *p*-value vector for randomly shuffled mutations and one
-break and estimates *p*-value of the null model as the 5% quantile of
-this vector
+Gets $\log_{10}$ *p*-value vector for randomly shuffled mutations and
+one break and estimates *p*-value of the null model as the 5% quantile
+of this vector
 
 ``` r
-p0 <- get_p0(muts,L=L,Kmin=0,A=100)
+p0 <- get_p0(muts,L=L,Kmin=0,A=20)
 ```
 
 Calculate p-value for `n=1`:
 
 ``` r
 res <- getBreaks(muts = muts, L = L, Kmin=0, n=1)
+if (res$optim$bestval>p0) {print("There is no support even for a single break")} else
+ {print("There is support for one break, let's test for more")}
+#> [1] "There is support for one break, let's test for more"
 ```
 
 To find optimal number of breaks
 
 ``` r
-res <- getBreaks(muts = muts, L = L, Kmin=0, n=2)
+resList <- list(res,getBreaks(muts = muts, L = L, Kmin=0, n=2))
+imax <- length(resList)
+while (resList[[imax]]$optim$bestval < resList[[imax-1]]$optim$bestval) 
+{
+  resList <- list.append(resList, getBreaks(muts = muts, L = L, Kmin=0, n=length(resList)+1))
+  imax <- length(resList)
+  print(imax)
+}
+p.values <- sapply(1:length(resList),function(i){resList[[i]]$optim$bestval})
+plot(1:length(resList),p.values)
 ```
+
+<img src="man/figures/README-find optimal number of breaks-1.png" width="100%" />
