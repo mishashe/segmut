@@ -68,5 +68,9 @@ for (i in 1:(length(breaks)-1))
 }
 ```
 
-<img src="man/figures/README-plot results-1.png" width="100%" /> \##
-Example with unknown number of breaks
+<img src="man/figures/README-plot results-1.png" width="100%" />
+
+## Example with unknown number of breaks
+
+This is a basic example which shows you how to find optimal number of
+breaks and their locations
