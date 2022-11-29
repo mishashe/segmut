@@ -26,11 +26,16 @@ This is a basic example which shows you how to solve a common problem:
 
 To load nessesary libraries:
 
-    #> Loading required package: parallel
-    #> 
-    #> DEoptim package
-    #> Differential Evolution algorithm in R
-    #> Authors: D. Ardia, K. Mullen, B. Peterson and J. Ulrich
+``` r
+library(segmut)
+library(DEoptim)
+#> Loading required package: parallel
+#> 
+#> DEoptim package
+#> Differential Evolution algorithm in R
+#> Authors: D. Ardia, K. Mullen, B. Peterson and J. Ulrich
+library(RColorBrewer)
+```
 
 To generate example of genome of length L with vector of mutation
 locations muts:
@@ -51,7 +56,8 @@ To plot the results
 ``` r
 breaks <- sort(c(0,res$optim$bestmem,L))
 colors <- brewer.pal(name="Paired", n=length(breaks)-1)
-plot(muts,rep(0,length(muts)),pch=".")
+plot(muts,rep(0,length(muts)),pch=".", cex = 2,ylim=c(-0.06,0.01),ylab="",xlab="", axes=F)
+axis(side=1, at=c(0,3000,8000,L))
 for (i in 1:(length(breaks)-1))
 {
   lines(c(breaks[i],breaks[i+1]),c(-0.05,-0.05),col=colors[i], lwd=5)
