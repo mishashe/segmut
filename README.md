@@ -45,10 +45,10 @@ locations `muts`:
 
 ``` r
 L <- 10000
-muts <- sort(c(sample(1:3000,400),sample(3001:8000,250),sample(8001:10000,400)))
+muts <- sort(c(sample(1:3000,3000*0.1),sample(3001:8000,5000*0.15),sample(8001:10000,2000*0.12)))
 ```
 
-To find optimal breaks given n=2 number of breaks
+To find optimal breaks given `n=2` number of breaks
 
 ``` r
 res <- getBreaks(muts = muts, L = L, Kmin=0, n=2)
@@ -68,4 +68,5 @@ for (i in 1:(length(breaks)-1))
 }
 ```
 
-<img src="man/figures/README-plot results-1.png" width="100%" />
+<img src="man/figures/README-plot results-1.png" width="100%" /> \##
+Example with unknown number of breaks
