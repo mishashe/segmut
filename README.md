@@ -1,3 +1,6 @@
+segmut
+================
+2022-11-29
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
@@ -20,17 +23,22 @@ You can install the development version of segmut from
 devtools::install_github("mishashe/segmut")
 ```
 
-## Example
-
-This is a basic example which shows you how to solve a common problem:
-
 To load nessesary libraries:
 
-    #> Loading required package: parallel
-    #> 
-    #> DEoptim package
-    #> Differential Evolution algorithm in R
-    #> Authors: D. Ardia, K. Mullen, B. Peterson and J. Ulrich
+``` r
+library(segmut)
+library(DEoptim, quietly=T) # to find optimal break points using differential evolution algorithm
+#> 
+#> DEoptim package
+#> Differential Evolution algorithm in R
+#> Authors: D. Ardia, K. Mullen, B. Peterson and J. Ulrich
+library(RColorBrewer, quietly=T) # to plot results
+```
+
+## Example with known number of breaks n=2
+
+This is a basic example which shows you how to find positions of n=2
+breaks:
 
 To generate example of genome of length L with vector of mutation
 locations muts:
