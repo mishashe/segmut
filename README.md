@@ -33,6 +33,11 @@ library(DEoptim, quietly=T) # to find optimal break points using differential ev
 #> Differential Evolution algorithm in R
 #> Authors: D. Ardia, K. Mullen, B. Peterson and J. Ulrich
 library(RColorBrewer, quietly=T) # to plot results
+library(doParallel)
+#> Loading required package: foreach
+#> Loading required package: iterators
+ncores <- 4
+registerDoParallel(cores = ncores)
 ```
 
 ## Example with known number of breaks `n=2`
@@ -48,7 +53,7 @@ L <- 10000
 muts <- sort(c(sample(1:3000,3000*0.1),sample(3001:8000,5000*0.15),sample(8001:10000,2000*0.12)))
 ```
 
-To find optimal breaks given `n=2` number of breaks
+To find optimal breaks locations given `n=2` number of breaks
 
 ``` r
 res <- getBreaks(muts = muts, L = L, Kmin=0, n=2)
@@ -73,4 +78,24 @@ for (i in 1:(length(breaks)-1))
 ## Example with unknown number of breaks
 
 This is a basic example which shows you how to find optimal number of
-breaks and their locations
+breaks and their locations:
+
+Gets log10 *p*-value vector for randomly shuffled mutations and one
+break and estimates *p*-value of the null model as the 5% quantile of
+this vector
+
+``` r
+p0 <- get_p0(muts,L=L,Kmin=0,A=100)
+```
+
+Calculate p-value for `n=1`:
+
+``` r
+res <- getBreaks(muts = muts, L = L, Kmin=0, n=1)
+```
+
+To find optimal number of breaks
+
+``` r
+res <- getBreaks(muts = muts, L = L, Kmin=0, n=2)
+```

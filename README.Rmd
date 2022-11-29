@@ -78,10 +78,14 @@ This is a basic example which shows you how to find optimal number of breaks and
 Gets log10 *p*-value vector for randomly shuffled mutations and one break and estimates *p*-value of the null model as the 5% quantile of this vector
 ```{r calculates p0}
 p0 <- get_p0(muts,L=L,Kmin=0,A=100)
+```
 
+Calculate p-value for `n=1`:
+```{r p-value for one break}
+res <- getBreaks(muts = muts, L = L, Kmin=0, n=1)
 ```
 
 To find optimal number of breaks
-```{r find optimal breaks}
+```{r find optimal number of breaks}
 res <- getBreaks(muts = muts, L = L, Kmin=0, n=2)
 ```
