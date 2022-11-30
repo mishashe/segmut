@@ -113,7 +113,6 @@ while (resList[[imax]]$optim$bestval < resList[[imax-1]]$optim$bestval)
   imax <- length(resList)
   print(imax)
 }
-#> [1] 3
 p.values <- sapply(1:length(resList),function(i){resList[[i]]$optim$bestval})
 plot(1:length(resList),p.values)
 ```
@@ -130,6 +129,7 @@ To plot the results
 ``` r
 breaks <- sort(c(0,res$optim$bestmem,L))
 colors <- brewer.pal(name="Paired", n=length(breaks)-1)
+#> Warning in brewer.pal(name = "Paired", n = length(breaks) - 1): minimal value for n is 3, returning requested palette with 3 different levels
 par(mar=c(2,0,0,0))
 plot(muts,rep(0,length(muts)),pch=".", cex = 1.5,ylim=c(-0.06,0.01),ylab="",xlab="", axes=F)
 axis(side=1, at=c(0,3000,8000,L))
