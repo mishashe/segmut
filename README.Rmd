@@ -49,13 +49,16 @@ library(KSgeneral)
 ```
 To set parameters
 ```{r set parameters}
-Kmin <- 50
+Kmin <- 100
 ```
 
 To generate example of genome of length ```L``` with vector of mutation locations ```muts```:
 ```{r genome example}
-L <- 10000
-muts <- sort(c(sample(1:3000,3000*0.1),sample(3001:8000,5000*0.2),sample(8001:10000,2000*0.15)))
+L <- 4000
+muts <- sort(c(sample(1:700,700*0.1),
+               sample(701:2000,2300*0.2),
+               sample(2001:3200,1200*0.15),
+               sample(3201:4000,800*0.08)))
 ```
 
 ## Example with known number of breaks ```n=2```
@@ -64,7 +67,7 @@ This is a basic example which shows you how to find positions of ```n=2``` break
 
 To find optimal breaks locations given ```n=2``` number of breaks
 ```{r find optimal breaks}
-res <- getBreaks(muts = muts, L = L, Kmin=Kmin, n=2)
+res <- getBreaks(muts = muts, L = L, Kmin=Kmin, n=3)
 ```
 To plot the results
 ```{r plot results,fig.width=10, fig.height=0.5}
@@ -72,7 +75,7 @@ breaks0L <- sort(c(0,res$optim$bestmem,L))
 colors <- brewer.pal(name="Paired", n=length(breaks0L)-1)
 par(mar=c(2,0,0,0))
 plot(muts,rep(0,length(muts)),pch=".", cex = 1.5,ylim=c(-0.06,0.01),ylab="",xlab="", axes=F)
-axis(side=1, at=c(0,3000,8000,L))
+axis(side=1, at=c(0,700,2000,3200,L))
 for (i in 1:(length(breaks0L)-1))
 {
   lines(c(breaks0L[i],breaks0L[i+1]),c(-0.05,-0.05),col=colors[i], lwd=5)
@@ -85,7 +88,7 @@ This is a basic example which shows you how to find optimal number of breaks and
 
 To find optimal number of breaks
 ```{r find optimal number of breaks}
-breaks <- getNumberBreaks(muts,L=max(muts)-min(muts)+1,Kmin=100,pThreshold=0.05)
+breaks <- getNumberBreaks(muts,L=L,Kmin=Kmin,pThreshold=0.05)
 ```
 To plot the results
 ```{r plot best results,fig.width=10, fig.height=0.5}
@@ -93,7 +96,7 @@ breaks0L <- sort(c(0,breaks,L))
 colors <- brewer.pal(name="Paired", n=length(breaks0L)-1)
 par(mar=c(2,0,0,0))
 plot(muts,rep(0,length(muts)),pch=".", cex = 1.5,ylim=c(-0.06,0.01),ylab="",xlab="", axes=F)
-axis(side=1, at=c(0,3000,8000,L))
+axis(side=1, at=c(0,700,2000,3200,L))
 for (i in 1:(length(breaks0L)-1))
 {
   lines(c(breaks0L[i],breaks0L[i+1]),c(-0.05,-0.05),col=colors[i], lwd=5)
