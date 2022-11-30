@@ -61,11 +61,11 @@ muts <- sort(c(sample(1:700,700*0.1),
                sample(3201:4000,800*0.08)))
 ```
 
-## Example with known number of breaks ```n=2```
+## Example with known number of breaks ```n=3```
 
-This is a basic example which shows you how to find positions of ```n=2``` breaks:
+This is a basic example which shows you how to find positions of ```n=3``` breaks:
 
-To find optimal breaks locations given ```n=2``` number of breaks
+To find optimal breaks locations given ```n=3``` number of breaks
 ```{r find optimal breaks}
 res <- getBreaks(muts = muts, L = L, Kmin=Kmin, n=3)
 ```
