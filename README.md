@@ -47,18 +47,18 @@ To set parameters
 Kmin <- 50
 ```
 
-## Example with known number of breaks `n=2`
-
-This is a basic example which shows you how to find positions of `n=2`
-breaks:
-
 To generate example of genome of length `L` with vector of mutation
 locations `muts`:
 
 ``` r
 L <- 10000
-muts <- sort(c(sample(1:3000,3000*0.1),sample(3001:8000,5000*0.18),sample(8001:10000,2000*0.12)))
+muts <- sort(c(sample(1:3000,3000*0.1),sample(3001:8000,5000*0.2),sample(8001:10000,2000*0.15)))
 ```
+
+## Example with known number of breaks `n=2`
+
+This is a basic example which shows you how to find positions of `n=2`
+breaks:
 
 To find optimal breaks locations given `n=2` number of breaks
 
@@ -69,14 +69,14 @@ res <- getBreaks(muts = muts, L = L, Kmin=Kmin, n=2)
 To plot the results
 
 ``` r
-breaks <- sort(c(0,res$optim$bestmem,L))
-colors <- brewer.pal(name="Paired", n=length(breaks)-1)
+breaks0L <- sort(c(0,res$optim$bestmem,L))
+colors <- brewer.pal(name="Paired", n=length(breaks0L)-1)
 par(mar=c(2,0,0,0))
 plot(muts,rep(0,length(muts)),pch=".", cex = 1.5,ylim=c(-0.06,0.01),ylab="",xlab="", axes=F)
 axis(side=1, at=c(0,3000,8000,L))
-for (i in 1:(length(breaks)-1))
+for (i in 1:(length(breaks0L)-1))
 {
-  lines(c(breaks[i],breaks[i+1]),c(-0.05,-0.05),col=colors[i], lwd=5)
+  lines(c(breaks0L[i],breaks0L[i+1]),c(-0.05,-0.05),col=colors[i], lwd=5)
 }
 ```
 
