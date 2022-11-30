@@ -20,8 +20,8 @@ You can install the development version of segmut from
 ``` r
 # install.packages("devtools")
 # Sys.unsetenv("GITHUB_PAT")
-install.packages("/home/misha/Documents/Development/segmut/", repos = NULL, type = "source")
-# devtools::install_github("mishashe/segmut")
+# install.packages("/home/misha/Documents/Development/segmut/", repos = NULL, type = "source")
+devtools::install_github("mishashe/segmut")
 ```
 
 To load nessesary libraries:
@@ -34,11 +34,6 @@ library(DEoptim, quietly=T) # to find optimal break points using differential ev
 #> Differential Evolution algorithm in R
 #> Authors: D. Ardia, K. Mullen, B. Peterson and J. Ulrich
 library(RColorBrewer, quietly=T) # to plot results
-library(doParallel, quietly=T)
-ncores <- 4 # set to desired number of cores for parallel computation
-registerDoParallel(cores = ncores)
-library(rlist)
-library(KSgeneral)
 ```
 
 To set parameters
