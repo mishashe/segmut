@@ -1,6 +1,6 @@
 segmut
 ================
-2022-11-29
+2022-11-30
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
@@ -20,7 +20,8 @@ You can install the development version of segmut from
 ``` r
 # install.packages("devtools")
 # Sys.unsetenv("GITHUB_PAT")
-devtools::install_github("mishashe/segmut")
+install.packages("/home/misha/Documents/Development/segmut/", repos = NULL, type = "source")
+# devtools::install_github("mishashe/segmut")
 ```
 
 To load nessesary libraries:
@@ -37,12 +38,13 @@ library(doParallel, quietly=T)
 ncores <- 4 # set to desired number of cores for parallel computation
 registerDoParallel(cores = ncores)
 library(rlist)
+library(KSgeneral)
 ```
 
 To set parameters
 
 ``` r
-Kmin <- 300
+Kmin <- 50
 ```
 
 ## Example with known number of breaks `n=2`
@@ -85,57 +87,23 @@ for (i in 1:(length(breaks)-1))
 This is a basic example which shows you how to find optimal number of
 breaks and their locations:
 
-Gets $\log_{10}$ *p*-value vector for randomly shuffled mutations and
-one break and estimates *p*-value of the null model as the 5% quantile
-of this vector
-
-``` r
-p0 <- get_p0(muts,L=L,Kmin=Kmin,A=20)
-```
-
-Calculate p-value for `n=1`:
-
-``` r
-res <- getBreaks(muts = muts, L = L, Kmin=Kmin, n=1)
-if (res$optim$bestval>p0) {print("There is no support even for a single break")} else
- {print("There is support for one break, let's test for more")}
-#> [1] "There is support for one break, let's test for more"
-```
-
 To find optimal number of breaks
 
 ``` r
-resList <- list(res,getBreaks(muts = muts, L = L, Kmin=Kmin, n=2))
-imax <- length(resList)
-while (resList[[imax]]$optim$bestval < resList[[imax-1]]$optim$bestval) 
-{
-  resList <- list.append(resList, getBreaks(muts = muts, L = L, Kmin=Kmin, n=length(resList)+1))
-  imax <- length(resList)
-  print(imax)
-}
-p.values <- sapply(1:length(resList),function(i){resList[[i]]$optim$bestval})
-plot(1:length(resList),p.values)
-```
-
-<img src="man/figures/README-find optimal number of breaks-1.png" width="100%" />
-
-``` r
-n <- which.min(p.values)
-res <- resList[[n]]
+breaks <- getNumberBreaks(muts,L=max(muts)-min(muts)+1,Kmin=100,pThreshold=0.05)
 ```
 
 To plot the results
 
 ``` r
-breaks <- sort(c(0,res$optim$bestmem,L))
-colors <- brewer.pal(name="Paired", n=length(breaks)-1)
-#> Warning in brewer.pal(name = "Paired", n = length(breaks) - 1): minimal value for n is 3, returning requested palette with 3 different levels
+breaks0L <- sort(c(0,breaks,L))
+colors <- brewer.pal(name="Paired", n=length(breaks0L)-1)
 par(mar=c(2,0,0,0))
 plot(muts,rep(0,length(muts)),pch=".", cex = 1.5,ylim=c(-0.06,0.01),ylab="",xlab="", axes=F)
 axis(side=1, at=c(0,3000,8000,L))
-for (i in 1:(length(breaks)-1))
+for (i in 1:(length(breaks0L)-1))
 {
-  lines(c(breaks[i],breaks[i+1]),c(-0.05,-0.05),col=colors[i], lwd=5)
+  lines(c(breaks0L[i],breaks0L[i+1]),c(-0.05,-0.05),col=colors[i], lwd=5)
 }
 ```
 

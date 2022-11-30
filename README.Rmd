@@ -32,12 +32,13 @@ You can install the development version of segmut from [GitHub](https://github.c
 ``` r
 # install.packages("devtools")
 # Sys.unsetenv("GITHUB_PAT")
-devtools::install_github("mishashe/segmut")
+install.packages("/home/misha/Documents/Development/segmut/", repos = NULL, type = "source")
+# devtools::install_github("mishashe/segmut")
 ```
 
 To load nessesary libraries:
 ```{r libraries, echo=TRUE, results='hide'}
-# library(segmut)
+library(segmut)
 library(DEoptim, quietly=T) # to find optimal break points using differential evolution algorithm
 library(RColorBrewer, quietly=T) # to plot results
 library(doParallel, quietly=T)
