@@ -15,7 +15,7 @@
 D_KS <- function(par,muts,L=max(muts)-min(muts)+1,Kmin=0)
 {
   xB <- c(0,sort(par),L)
-  if (any(diff(xB)<Kmin)) return(1e10)
+  if (any(diff(xB)<Kmin)) return(Inf)
   D <- 0
   for (i in 1:(length(xB)-1))
   {
