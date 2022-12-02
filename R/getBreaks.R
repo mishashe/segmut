@@ -35,13 +35,15 @@ getBreaks <- function(muts,L=max(muts)-min(muts)+1,Kmin=0,n=1)
 getNumberBreaks <- function(muts,L=max(muts)-min(muts)+1,Kmin=0,pThreshold=0.05)
 {
   p <- p_KS(c(),muts,L=L,Kmin=Kmin)
+  print(p)
   if (p>pThreshold) return(c())
   n <- 1
   repeat
   {
     res <- getBreaks(muts = muts, L = L, Kmin=Kmin, n=n)
+    print(p_KS(res$optim$bestmem,muts,L=L,Kmin=Kmin))
     p <- min(p_KS(res$optim$bestmem,muts,L=L,Kmin=Kmin))
-    if(min(p)>pThreshold/length(p)){return(res$optim$bestmem)}
+    if(min(p[!is.na(p)])>pThreshold/(n+1)){return(res$optim$bestmem)}
     n <- n + 1
   }
 }
