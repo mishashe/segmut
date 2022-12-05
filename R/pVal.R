@@ -57,6 +57,10 @@ p_KS <- function(par,muts,L=max(muts)-min(muts)+1,Kmin=0)
     {
       p <- c(p,ks.test(muts[Ind],"punif",xB[i],xB[i+1],exact=FALSE)$p.value)
     }
+    else
+    {
+      p <- c(p,1)
+    }
   }
   return(p)
 }

@@ -34,6 +34,7 @@ getBreaks <- function(muts,L=max(muts)-min(muts)+1,Kmin=0,n=1)
 #'
 getNumberBreaks <- function(muts,L=max(muts)-min(muts)+1,Kmin=0,pThreshold=0.05)
 {
+  if (length(muts)<3) return(c())
   p <- p_KS(c(),muts,L=L,Kmin=Kmin)
   print(p)
   if (p>pThreshold) return(c())
