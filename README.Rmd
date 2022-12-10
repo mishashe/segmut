@@ -41,6 +41,7 @@ To load nessesary libraries:
 library(segmut)
 library(DEoptim, quietly=T) # to find optimal break points using differential evolution algorithm
 library(RColorBrewer, quietly=T) # to plot results
+library(stringr)
 ```
 To set parameters
 ```{r set parameters}
@@ -86,7 +87,7 @@ To find optimal number of breaks
 breaks <- getNumberBreaks(muts,L=L,Kmin=Kmin,pThreshold=0.05)
 ```
 To plot the results
-```{r plot best results,fig.width=10, fig.height=0.5}
+```{r plot best results,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE}
 breaks0L <- sort(c(0,breaks,L))
 colors <- brewer.pal(name="Paired", n=length(breaks0L)-1)
 par(mar=c(2,0,0,0))
@@ -97,3 +98,17 @@ for (i in 1:(length(breaks0L)-1))
   lines(c(breaks0L[i],breaks0L[i+1]),c(-0.05,-0.05),col=colors[i], lwd=5)
 }
 ```
+
+## Example with Escherichia coli (NZ_CP033020.1) vs. Salmonella enterica (NZ_AP026948) alignment
+We align two bacterial genomes using nucmer and get all the alignment blocks and the mutations
+```{r alignment,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE}
+datadir <- "/home/misha/Documents/Development/segmut/data/"
+file1 <- paste0(datadir,"Escherichia_coli_1.fasta")
+file2 <- paste0(datadir,"Salmonella_enterica_1.fasta")
+system(paste0("nucmer --mum --prefix=",datadir,"align ",file1," ",file2), intern = TRUE, wait=TRUE)
+alignment <- system(paste0("show-aligns -w 500000 ", datadir,"align.delta NZ_CP033020.1 NZ_AP026948.1"), intern = TRUE, wait=TRUE)
+alignment <- alignment[str_detect(alignment,"\\^")]
+divergence <- sum(str_count(alignment,"\\^"))/sum(nchar(alignment))
+divergences <- (str_count(alignment,"\\^"))/(nchar(alignment))
+```
+

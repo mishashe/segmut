@@ -1,6 +1,6 @@
 segmut
 ================
-2022-11-30
+2022-12-10
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
@@ -34,6 +34,7 @@ library(DEoptim, quietly=T) # to find optimal break points using differential ev
 #> Differential Evolution algorithm in R
 #> Authors: D. Ardia, K. Mullen, B. Peterson and J. Ulrich
 library(RColorBrewer, quietly=T) # to plot results
+library(stringr)
 ```
 
 To set parameters
@@ -89,6 +90,10 @@ To find optimal number of breaks
 
 ``` r
 breaks <- getNumberBreaks(muts,L=L,Kmin=Kmin,pThreshold=0.05)
+#> [1] 0
+#> [1] 1.396169e-09 5.180829e-01
+#> [1] 0.471251747 0.064614271 0.001476743
+#> [1] 0.8258191 0.9764116 0.6269692 0.4385365
 ```
 
 To plot the results
@@ -106,3 +111,20 @@ for (i in 1:(length(breaks0L)-1))
 ```
 
 <img src="man/figures/README-plot best results-1.png" width="100%" />
+
+## Example with Escherichia coli (NZ_CP033020.1) vs. Salmonella enterica (NZ_AP026948) alignment
+
+We align two bacterial genomes using nucmer and get all the alignment
+blocks and the mutations
+
+``` r
+datadir <- "/home/misha/Documents/Development/segmut/data/"
+file1 <- paste0(datadir,"Escherichia_coli_1.fasta")
+file2 <- paste0(datadir,"Salmonella_enterica_1.fasta")
+system(paste0("nucmer --mum --prefix=",datadir,"align ",file1," ",file2), intern = TRUE, wait=TRUE)
+#> character(0)
+alignment <- system(paste0("show-aligns -w 500000 ", datadir,"align.delta NZ_CP033020.1 NZ_AP026948.1"), intern = TRUE, wait=TRUE)
+alignment <- alignment[str_detect(alignment,"\\^")]
+divergence <- sum(str_count(alignment,"\\^"))/sum(nchar(alignment))
+divergences <- (str_count(alignment,"\\^"))/(nchar(alignment))
+```
