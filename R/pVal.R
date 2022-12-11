@@ -22,7 +22,7 @@ D_KS <- function(par,muts,L=max(muts)-min(muts)+1,Kmin=0)
     Ind <- which(muts>=xB[i] & muts<=xB[i+1])
     if (length(Ind)>3)
     {
-      tes <- ks.test(muts[Ind],"punif",xB[i],xB[i+1],exact=FALSE)
+      tes <- ks.test(muts[Ind],"punif",xB[i],xB[i+1],exact=FALSE, simulate.p.value = FALSE)
       D <- D  + 1/abs(tes$p.value) + abs(tes$statistic)
     }
   }

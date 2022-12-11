@@ -35,6 +35,29 @@ library(DEoptim, quietly=T) # to find optimal break points using differential ev
 #> Authors: D. Ardia, K. Mullen, B. Peterson and J. Ulrich
 library(RColorBrewer, quietly=T) # to plot results
 library(stringr)
+library(tidyverse)
+#> ── Attaching packages
+#> ───────────────────────────────────────
+#> tidyverse 1.3.2 ──
+#> ✔ ggplot2 3.4.0      ✔ purrr   0.3.5 
+#> ✔ tibble  3.1.8      ✔ dplyr   1.0.10
+#> ✔ tidyr   1.2.1      ✔ forcats 0.5.2 
+#> ✔ readr   2.1.3      
+#> ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+#> ✖ dplyr::filter() masks stats::filter()
+#> ✖ dplyr::lag()    masks stats::lag()
+library(scales)
+#> 
+#> Attaching package: 'scales'
+#> 
+#> The following object is masked from 'package:purrr':
+#> 
+#>     discard
+#> 
+#> The following object is masked from 'package:readr':
+#> 
+#>     col_factor
+library(ggExtra)
 ```
 
 To set parameters
@@ -91,9 +114,9 @@ To find optimal number of breaks
 ``` r
 breaks <- getNumberBreaks(muts,L=L,Kmin=Kmin,pThreshold=0.05)
 #> [1] 0
-#> [1] 1.396169e-09 5.180829e-01
-#> [1] 0.471251747 0.064614271 0.001476743
-#> [1] 0.8258191 0.9764116 0.6269692 0.4385365
+#> [1] 1.194988e-09 4.185378e-01
+#> [1] 5.534259e-01 2.758467e-01 9.756934e-05
+#> [1] 0.9308560 0.9950918 0.6903301 0.6896496
 ```
 
 To plot the results
@@ -127,4 +150,20 @@ alignment <- system(paste0("show-aligns -w 500000 ", datadir,"align.delta NZ_CP0
 alignment <- alignment[str_detect(alignment,"\\^")]
 divergence <- sum(str_count(alignment,"\\^"))/sum(nchar(alignment))
 divergences <- (str_count(alignment,"\\^"))/(nchar(alignment))
+Ls <- nchar(alignment)
 ```
+
+Plotting divergences and lengths of the alignment blocks (not segmented
+ones):
+
+``` r
+p <- ggplot(data=data.frame(Ls=Ls,divergences=divergences), aes(Ls, divergences)) + 
+          geom_point(size=0.2) +
+          theme_bw() +
+          scale_x_continuous(trans='log10',breaks = 10^(-10:10), labels = trans_format("log10", math_format(10^.x))) +
+          scale_y_continuous(trans='log10',breaks = 10^(-10:10), labels = trans_format("log10", math_format(10^.x))) +
+          ylab("average block divergence") + xlab("block length") 
+  ggExtra::ggMarginal(p, type = "histogram")
+```
+
+<img src="man/figures/README-blocks-1.png" width="100%" />
