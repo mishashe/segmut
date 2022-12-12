@@ -10,24 +10,25 @@
 #' @return penalized chi square
 #' @export
 #'
+# Data driven chi-square test for
+# uniformity with unequal cells
+# Tadeusz Inglot a
+# & Alicja Janic-Wróblewska
 getChiSquare <- function(par,muts,L=max(muts)-min(muts)+1,Kmin=0)
 {
-  averageDivergence <- length(muts)/L
-  xB <- c(0,sort(par),L)
+  par <- sort(par)
+  xB <- c(0,par,L)
   Ks <- diff(xB)
   if (any(Ks<Kmin)) return(Inf)
-  D <- 0
-  for (i in 1:(length(xB)-1))
-  {
-    nmuts <- sum(muts>=xB[i] & muts<=xB[i+1])
-    D <- D  + (nmuts - Ks[i]*averageDivergence)^2/(Ks[i]*averageDivergence)
-  }
+  averageDivergence <- length(muts)/L
+  # nmuts <- .Internal(tabulate(.Internal(findInterval(vec=xB,x=muts, FALSE,FALSE,FALSE)), nbins=length(xB)-1))
+  nmuts <- .Call(graphics:::C_BinCount, muts, xB, TRUE, TRUE) # a bit faster than nmuts <- hist(muts,breaks=xB,plot=FALSE)$counts
+  D <- sum((nmuts - Ks*averageDivergence)^2/(Ks*averageDivergence))
   return(length(par)*log(length(muts))-D)
 }
 
 
-
-#' finds optimal breaks
+#' finds optimal breaks ChiSquare
 #'
 #' @description fits optimal breaks given number of breaks
 #'
@@ -42,21 +43,20 @@ getChiSquare <- function(par,muts,L=max(muts)-min(muts)+1,Kmin=0)
 getBreaksChiSquare <- function(muts,L=max(muts)-min(muts)+1,Kmin=0,n=1)
 {
   res <- DEoptim(getChiSquare, lower = rep(0,n), upper = rep(L,n),
-                 control = DEoptim.control(trace = 0),
+                 control = DEoptim.control(trace = 0,parallelType='none'),
                  muts=muts,L=L,Kmin=Kmin)
   return(res)
 }
 
 
 
-#' finds optimal number of breaks
+#' finds optimal number of breaks ChiSquare
 #'
 #' @description fits optimal breaks NOT given number of breaks
 #'
 #' @param muts vector of mutations locations
 #' @param L length of locus
 #' @param Kmin minimal length of a segment
-#' @param pThreshold significance threshold of the uniform KS test
 #'
 #' @return breaks locations for optimal number of breaks
 #' @export

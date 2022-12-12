@@ -1,6 +1,6 @@
 segmut
 ================
-2022-12-10
+2022-12-12
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
@@ -18,9 +18,10 @@ You can install the development version of segmut from
 [GitHub](https://github.com/) with:
 
 ``` r
+# detach("package:segmut", unload=TRUE)
 # install.packages("devtools")
 # Sys.unsetenv("GITHUB_PAT")
-# install.packages("/home/misha/Documents/Development/segmut/", repos = NULL, type = "source")
+# install.packages("/home/misha/Documents/Development/segmut/", repos = NULL, type = "source",force=TRUE)
 devtools::install_github("mishashe/segmut")
 ```
 
@@ -58,12 +59,13 @@ library(scales)
 #> 
 #>     col_factor
 library(ggExtra)
+library(stringi)
 ```
 
 To set parameters
 
 ``` r
-Kmin <- 100
+Kmin <- 10
 ```
 
 To generate example of genome of length `L` with vector of mutation
@@ -85,7 +87,7 @@ breaks:
 To find optimal breaks locations given `n=3` number of breaks
 
 ``` r
-res <- getBreaks(muts = muts, L = L, Kmin=Kmin, n=3)
+res <- getBreaksChiSquare(muts = muts, L = L, Kmin=Kmin, n=3)
 ```
 
 To plot the results
@@ -112,11 +114,7 @@ breaks and their locations:
 To find optimal number of breaks
 
 ``` r
-breaks <- getNumberBreaks(muts,L=L,Kmin=Kmin,pThreshold=0.05)
-#> [1] 0
-#> [1] 1.194988e-09 4.185378e-01
-#> [1] 5.534259e-01 2.758467e-01 9.756934e-05
-#> [1] 0.9308560 0.9950918 0.6903301 0.6896496
+breaks <- getNumberBreaksChiSquare(muts,L=L,Kmin=Kmin)
 ```
 
 To plot the results
@@ -148,22 +146,118 @@ system(paste0("nucmer --mum --prefix=",datadir,"align ",file1," ",file2), intern
 #> character(0)
 alignment <- system(paste0("show-aligns -w 500000 ", datadir,"align.delta NZ_CP033020.1 NZ_AP026948.1"), intern = TRUE, wait=TRUE)
 alignment <- alignment[str_detect(alignment,"\\^")]
+alignment <- lapply(1:length(alignment),function(i){gsub("(\\^)\\1{1,}", "\\1", alignment[[i]])}) # removing adjacent mutations
 divergence <- sum(str_count(alignment,"\\^"))/sum(nchar(alignment))
-divergences <- (str_count(alignment,"\\^"))/(nchar(alignment))
+block_divergences <- (str_count(alignment,"\\^"))/(nchar(alignment))
 Ls <- nchar(alignment)
+r <- stri_locate_all(pattern = '^', alignment, fixed = TRUE)
+rs <- c()
+for (i in order(-nchar(alignment))) rs <- c(rs,diff(r[[i]][,1]))
 ```
 
 Plotting divergences and lengths of the alignment blocks (not segmented
 ones):
 
 ``` r
-p <- ggplot(data=data.frame(Ls=Ls,divergences=divergences), aes(Ls, divergences)) + 
+p <- ggplot(data=data.frame(Ls=Ls,block_divergences=block_divergences), aes(Ls, block_divergences)) + 
           geom_point(size=0.2) +
           theme_bw() +
           scale_x_continuous(trans='log10',breaks = 10^(-10:10), labels = trans_format("log10", math_format(10^.x))) +
-          scale_y_continuous(trans='log10',breaks = 10^(-10:10), labels = trans_format("log10", math_format(10^.x))) +
+          # scale_y_continuous(trans='log10',breaks = 10^(-10:10), labels = trans_format("log10", math_format(10^.x))) +
           ylab("average block divergence") + xlab("block length") 
   ggExtra::ggMarginal(p, type = "histogram")
 ```
 
-<img src="man/figures/README-blocks-1.png" width="100%" />
+<img src="man/figures/README-blocks-1.png" width="100%" /> In total
+there are 733 blocks with the total length of 1746795 bp.
+
+Segmenting the blocks using segmut package:
+
+``` r
+Ks <- c()
+taus <- c()
+start_time <- Sys.time()
+for (i in order(-nchar(alignment)))
+{
+  L <- nchar(alignment[[i]])
+  rtemp <- r[[i]][,1]
+  muts <- sort(rtemp + sample(0:0,length(rtemp),replace=TRUE))
+  breaks <- sort(getNumberBreaksChiSquare(muts,L=L,Kmin=1))
+  breaks0L <- c(0,breaks,L)
+  for (j in 1:(length(breaks0L)-1))
+  {
+    Ks <- c(Ks, breaks0L[j+1]-breaks0L[j]+1)
+    taus <- c(taus, sum(muts<breaks0L[j+1] & muts>breaks0L[j])/(breaks0L[j+1]-breaks0L[j]+1))
+  }
+}
+end_time <- Sys.time()
+print(end_time - start_time)
+#> Time difference of 8.159166 mins
+```
+
+Plotting divergences and lengths of the segments:
+
+``` r
+p <- ggplot(data=data.frame(Ks=Ks,taus=taus), aes(Ks, taus)) + 
+          geom_point(size=0.2) +
+          theme_bw() +
+          scale_x_continuous(trans='log10',breaks = 10^(-10:10), labels = trans_format("log10", math_format(10^.x))) +
+          # scale_y_continuous(trans='log10',breaks = 10^(-10:10), labels = trans_format("log10", math_format(10^.x))) +
+          ylab("segment divergence") + xlab("segment length") + 
+          geom_smooth(method="loess",se=TRUE) 
+  ggExtra::ggMarginal(p, type = "histogram")
+```
+
+<img src="man/figures/README-plot segments-1.png" width="100%" />
+
+Calculating empirical and pseudotheoretical MLDs:
+
+``` r
+rB <- c(seq(0.5,35.5,3),10^seq(log10(35.5)+0.1,4.8,0.1))
+rV <- 0.5*(rB[-length(rB)]+rB[-1])
+pH <- hist(rs,breaks=rB,plot=FALSE)
+
+mPT <- rV*0
+for (ir in 1:length(rV)) 
+{
+  mPT[ir] <- sum((Ks>rV[ir])*(2*taus+(Ks-rV[ir])*taus^2)*exp(-rV[ir]*taus))
+}
+for (iK in 1:length(Ks)) 
+{
+  ir <- which(Ks[iK]<=rB[2:length(rB)] & Ks[iK]>=rB[1:(length(rB)-1)])
+  mPT[ir] <- mPT[ir] + exp(-taus[iK]*Ks[iK])/diff(rB)[ir]
+}
+
+mBlocks <- rV*0
+for (ir in 1:length(rV)) 
+{
+  mBlocks[ir] <- sum((Ls>rV[ir])*(2*block_divergences+(Ls-rV[ir])*block_divergences^2)*exp(-rV[ir]*block_divergences))
+}
+for (iL in 1:length(Ls)) 
+{
+  ir <- which(Ls[iL]<=rB[2:length(rB)] & Ls[iL]>=rB[1:(length(rB)-1)])
+  mBlocks[ir] <- mBlocks[ir] + exp(-block_divergences[iL]*Ls[iL])/diff(rB)[ir]
+}
+
+Ktot <- sum(Ls)
+mExp <- (2*divergence+(Ktot-rV)*divergence^2)*exp(-rV*divergence)
+dat <- data.frame(rV=rV,mE=pH$counts/diff(rB),mPT=mPT, mExp=mExp,mBlocks=mBlocks)
+```
+
+Plotting empirical and pseudotheoretical MLDs:
+
+``` r
+ggplot(data=dat, aes(rV, mE)) + 
+          geom_line(aes(rV, mPT),col="blue", size=0.2) +
+          geom_line(aes(rV, mExp),col="grey", size=0.5,linetype = "solid") +
+          geom_line(aes(rV, mBlocks),col="red", size=0.2) +
+          theme_bw() +
+          scale_x_continuous(limits = c(1e0, 1e3),trans='log10',breaks = 10^(-10:10), labels = trans_format("log10", math_format(10^.x))) +
+          scale_y_continuous(limits = c(1e-3, 1e5),trans='log10',breaks = 10^(-10:10), labels = trans_format("log10", math_format(10^.x))) +
+          geom_line(aes(rV,1e8/rV^3),linetype = "dashed") + 
+          geom_line(aes(rV,1e10/rV^4),linetype = "dotted") + 
+          geom_point(size=2,shape='o') +
+          xlab("r") + ylab("m(r)") 
+```
+
+<img src="man/figures/README-mld-1.png" width="100%" />

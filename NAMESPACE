@@ -2,5 +2,8 @@
 
 export(D_KS)
 export(getBreaks)
+export(getBreaksChiSquare)
+export(getChiSquare)
 export(getNumberBreaks)
+export(getNumberBreaksChiSquare)
 export(p_KS)
