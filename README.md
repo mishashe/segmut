@@ -192,7 +192,7 @@ for (i in order(-nchar(alignment)))
 }
 end_time <- Sys.time()
 print(end_time - start_time)
-#> Time difference of 8.159166 mins
+#> Time difference of 7.592661 mins
 ```
 
 Plotting divergences and lengths of the segments:

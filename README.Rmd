@@ -122,7 +122,7 @@ rs <- c()
 for (i in order(-nchar(alignment))) rs <- c(rs,diff(r[[i]][,1]))
 ```
 Plotting divergences and lengths of the alignment blocks (not segmented ones): 
-```{r blocks,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=2, fig.height=2}
+```{r blocks, echo=TRUE, fig.height=8, fig.width=8, message=FALSE, warning=FALSE}
 p <- ggplot(data=data.frame(Ls=Ls,block_divergences=block_divergences), aes(Ls, block_divergences)) + 
           geom_point(size=0.2) +
           theme_bw() +
@@ -134,7 +134,7 @@ p <- ggplot(data=data.frame(Ls=Ls,block_divergences=block_divergences), aes(Ls, 
 In total there are `r length(Ls)` blocks with the total length of `r sum(Ls)` bp.
 
 Segmenting the blocks using segmut package:
-```{r breaking to segments,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=2, fig.height=2}
+```{r breaking to segments,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=8, fig.height=8}
 Ks <- c()
 taus <- c()
 start_time <- Sys.time()
@@ -143,7 +143,7 @@ for (i in order(-nchar(alignment)))
   L <- nchar(alignment[[i]])
   rtemp <- r[[i]][,1]
   muts <- sort(rtemp + sample(0:0,length(rtemp),replace=TRUE))
-  breaks <- sort(getNumberBreaksChiSquare(muts,L=L,Kmin=1))
+  breaks <- sort(getNumberBreaksChiSquare(muts,L=L,Kmin=10))
   breaks0L <- c(0,breaks,L)
   for (j in 1:(length(breaks0L)-1))
   {
@@ -157,7 +157,7 @@ print(end_time - start_time)
 
 
 Plotting divergences and lengths of the segments: 
-```{r plot segments,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=2, fig.height=2}
+```{r plot segments,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=8, fig.height=8}
 p <- ggplot(data=data.frame(Ks=Ks,taus=taus), aes(Ks, taus)) + 
           geom_point(size=0.2) +
           theme_bw() +
@@ -206,7 +206,7 @@ dat <- data.frame(rV=rV,mE=pH$counts/diff(rB),mPT=mPT, mExp=mExp,mBlocks=mBlocks
 
 
 Plotting empirical and pseudotheoretical MLDs: 
-```{r mld,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=2, fig.height=2}
+```{r mld,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=8, fig.height=8}
 ggplot(data=dat, aes(rV, mE)) + 
           geom_line(aes(rV, mPT),col="blue", size=0.2) +
           geom_line(aes(rV, mExp),col="grey", size=0.5,linetype = "solid") +
