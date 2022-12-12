@@ -65,7 +65,7 @@ library(stringi)
 To set parameters
 
 ``` r
-Kmin <- 10
+Kmin <- 20
 ```
 
 To generate example of genome of length `L` with vector of mutation
@@ -182,7 +182,7 @@ for (i in order(-nchar(alignment)))
   L <- nchar(alignment[[i]])
   rtemp <- r[[i]][,1]
   muts <- sort(rtemp + sample(0:0,length(rtemp),replace=TRUE))
-  breaks <- sort(getNumberBreaksChiSquare(muts,L=L,Kmin=1))
+  breaks <- sort(getNumberBreaksChiSquare(muts,L=L,Kmin=Kmin))
   breaks0L <- c(0,breaks,L)
   for (j in 1:(length(breaks0L)-1))
   {
@@ -192,7 +192,7 @@ for (i in order(-nchar(alignment)))
 }
 end_time <- Sys.time()
 print(end_time - start_time)
-#> Time difference of 7.592661 mins
+#> Time difference of 6.638279 mins
 ```
 
 Plotting divergences and lengths of the segments:

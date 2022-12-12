@@ -50,7 +50,7 @@ library(stringi)
 ```
 To set parameters
 ```{r set parameters}
-Kmin <- 10
+Kmin <- 20
 ```
 
 To generate example of genome of length ```L``` with vector of mutation locations ```muts```:
@@ -143,7 +143,7 @@ for (i in order(-nchar(alignment)))
   L <- nchar(alignment[[i]])
   rtemp <- r[[i]][,1]
   muts <- sort(rtemp + sample(0:0,length(rtemp),replace=TRUE))
-  breaks <- sort(getNumberBreaksChiSquare(muts,L=L,Kmin=10))
+  breaks <- sort(getNumberBreaksChiSquare(muts,L=L,Kmin=Kmin))
   breaks0L <- c(0,breaks,L)
   for (j in 1:(length(breaks0L)-1))
   {
