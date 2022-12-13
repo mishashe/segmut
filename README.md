@@ -44,7 +44,7 @@ options(warn=-1)
 To set parameters
 
 ``` r
-Kmin <- 20
+Kmin <- 50
 ```
 
 To generate example of genome of length `L` with vector of mutation
@@ -68,8 +68,8 @@ To find optimal breaks locations given `n=3` number of breaks
 ``` r
 res <- suppressWarnings(getBreaksChiSquare(muts = muts, L = L, Kmin=Kmin, n=3))
 print(res)
-#> par1 par2 par3 
-#>  701 2005 3312
+#>      par1      par2      par3 
+#>  688.9998 1995.0001 3265.0006
 ```
 
 To plot the results
@@ -98,8 +98,8 @@ To find optimal number of breaks
 ``` r
 res <- suppressWarnings(getNumberBreaksChiSquare(muts,L=L,Kmin=Kmin))
 print(res)
-#>      par1      par2      par3      par4 
-#>  700.9966 1970.9991 2005.0004 3312.0117
+#> par1 par2 par3 
+#>  689 1995 3265
 ```
 
 To plot the results
@@ -207,10 +207,10 @@ for (i in order(-Ls))
 }
 end_time <- Sys.time()
 print(end_time - start_time)
-#> Time difference of 1.794904 mins
+#> Time difference of 1.639489 mins
 ```
 
-In total there are 2219 segments.
+In total there are 2070 segments.
 
 Plotting divergences and lengths of the segments:
 

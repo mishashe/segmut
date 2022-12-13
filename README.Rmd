@@ -53,7 +53,7 @@ options(warn=-1)
 ```
 To set parameters
 ```{r set parameters}
-Kmin <- 20
+Kmin <- 50
 ```
 
 To generate example of genome of length ```L``` with vector of mutation locations ```muts```:

@@ -72,7 +72,7 @@ getNumberBreaksChiSquare <- function(muts,L=max(muts)-min(muts)+1,Kmin=0)
 {
   n <- 0
   parPrev <- c()
-  if (length(muts)<2 | Kmin>=L) return(parPrev)
+  if (length(muts)<2 | (Kmin*2+2)>=L) return(parPrev)
   ChiSquarePrev <- 0*log(length(muts)) + getChiSquare(parPrev,muts,L=L,Kmin=Kmin)
   repeat
   {
