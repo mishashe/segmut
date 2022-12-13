@@ -20,11 +20,11 @@ getChiSquare <- function(par,muts,L=max(muts)-min(muts)+1,Kmin=0)
   xB <- c(0,par,L)
   Ks <- diff(xB)
   if (any(Ks<Kmin)) return(Inf)
-  expected <- length(muts)/L*Ks
+  expected <- (length(muts)/L)*Ks
   # nmuts <- .Internal(tabulate(.Internal(findInterval(vec=xB,x=muts, FALSE,FALSE,FALSE)), nbins=length(xB)-1))
   nmuts <- .Call(graphics:::C_BinCount, muts, xB, TRUE, TRUE) # a bit faster than nmuts <- hist(muts,breaks=xB,plot=FALSE)$counts
-  D <- sum((nmuts - expected)^2/expected)
-  return(length(par)*log(length(muts))-D)
+  chiSquare <- sum((nmuts - expected)^2/expected)
+  return(-chiSquare)
 }
 
 
@@ -65,13 +65,14 @@ getNumberBreaksChiSquare <- function(muts,L=max(muts)-min(muts)+1,Kmin=0)
 {
   n <- 0
   parPrev <- c()
-  ChiSquarePrev <- getChiSquare(parPrev,muts,L=L,Kmin=Kmin)
+  ChiSquarePrev <- 0*log(length(muts)) + getChiSquare(parPrev,muts,L=L,Kmin=Kmin)
+  if (Kmin>=L) return(parPrev)
   repeat
   {
     n <- n + 1
     par <- getBreaksChiSquare(muts = muts, L = L, Kmin=Kmin, n=n)$optim$bestmem
-    ChiSquare <- getChiSquare(par,muts,L=L,Kmin=Kmin)
-    if(ChiSquare>ChiSquarePrev){return(parPrev)}
+    ChiSquare <- n*log(length(muts)) + getChiSquare(par,muts,L=L,Kmin=Kmin)
+    if(ChiSquare>ChiSquarePrev | Kmin*(n+1)>=L){return(parPrev)}
     parPrev <- par
     ChiSquarePrev <- ChiSquare
   }
