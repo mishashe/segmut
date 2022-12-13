@@ -48,6 +48,8 @@ library(scales)
 library(ggExtra)
 library(stringi)
 library(ggplot2)
+library(plotrix)
+options(warn=-1)
 ```
 To set parameters
 ```{r set parameters}
@@ -69,11 +71,11 @@ This is a basic example which shows you how to find positions of ```n=3``` break
 
 To find optimal breaks locations given ```n=3``` number of breaks
 ```{r find optimal breaks}
-res <- getBreaksChiSquare(muts = muts, L = L, Kmin=Kmin, n=3)
+res <- suppressWarnings(getBreaksChiSquare(muts = muts, L = L, Kmin=Kmin, n=3))
 ```
 To plot the results
 ```{r plot results,fig.width=10, fig.height=0.5}
-breaks0L <- sort(c(0,res$optim$bestmem,L))
+breaks0L <- sort(c(0,res,L))
 colors <- brewer.pal(name="Paired", n=length(breaks0L)-1)
 par(mar=c(2,0,0,0))
 plot(muts,rep(0,length(muts)),pch=".", cex = 1.5,ylim=c(-0.06,0.01),ylab="",xlab="", axes=F)
@@ -90,7 +92,7 @@ This is a basic example which shows you how to find optimal number of breaks and
 
 To find optimal number of breaks
 ```{r find optimal number of breaks}
-breaks <- getNumberBreaksChiSquare(muts,L=L,Kmin=Kmin)
+breaks <- suppressWarnings(getNumberBreaksChiSquare(muts,L=L,Kmin=Kmin))
 ```
 To plot the results
 ```{r plot best results,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE}
@@ -175,7 +177,7 @@ for (i in order(-Ls))
 {
   muts <- mutsS[[i]]
   L <- Ls[[i]]
-  breaks <- sort(getNumberBreaksChiSquare(muts,L=L,Kmin=Kmin))
+  breaks <- sort(suppressWarnings(getNumberBreaksChiSquare(muts=muts,L=L,Kmin=Kmin)))
   breaks0L <- c(0,breaks,L)
   for (j in 1:(length(breaks0L)-1))
   {
@@ -205,43 +207,41 @@ Calculating empirical and pseudotheoretical MLDs:
 ```{r calc mld ,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=2, fig.height=2}
 rB <- c(seq(-0.5,35.5,3),10^seq(log10(35.5)+0.1,4.8,0.1))
 rV <- 0.5*(rB[-length(rB)]+rB[-1])
-pH <- hist(r,breaks=rB,plot=FALSE)
+p <- hist(r,breaks=rB,plot=FALSE)
+mE <- p$counts/diff(rB)
 
-mPT <- rV*0
-for (ir in 1:length(rV)) 
+
+rA <- 0:max(Ls+1)
+mPT <- rA*0
+for (ir in 1:length(rA)) 
 {
-  # mPT[ir] <- sum((Ks>rV[ir])*(2*taus+(Ks-rV[ir])*taus^2)*exp(-rV[ir]*taus))
-    mPT[ir] <- sum((Ks>rV[ir])*(2*taus+(Ks-rV[ir])*taus^2)*(1-taus)^rV[ir])
+    mPT[ir] <- sum((Ks>rA[ir])*(2*taus+(Ks-rA[ir]-1)*taus^2)*exp(log(1-taus)*rA[ir]))
 }
 for (iK in 1:length(Ks)) 
 {
-  ir <- which(Ks[iK]<=rB[2:length(rB)] & Ks[iK]>=rB[1:(length(rB)-1)])
-  mPT[ir] <- mPT[ir] + exp(-taus[iK]*Ks[iK])/diff(rB)[ir]
+  mPT[Ks[iK]+1] <- mPT[Ks[iK]+1] + exp(log(1-taus[iK])*Ks[iK])
 }
+p <- weighted.hist(rA,w=mPT,breaks=rB,plot=FALSE)
+mPT <- p$counts/diff(rB)
 
-genome <- c()
-for (iK in 1:length(Ks)) 
+mBlocks <- rA*0
+for (ir in 1:length(rA)) 
 {
-  genome <- c(genome,runif(Ks[iK])>(1-taus[iK]))
-}
-r_fromtau <- diff(sort(which(genome)))
-m_PT_numeric <- hist(r_fromtau,breaks=rB,plot=FALSE)$counts/diff(rB)
-
-
-mBlocks <- rV*0
-for (ir in 1:length(rV)) 
-{
-  mBlocks[ir] <- sum((Ls>rV[ir])*(2*block_divergences+(Ls-rV[ir])*block_divergences^2)*exp(-rV[ir]*block_divergences))
+  mBlocks[ir] <- sum((Ls>rA[ir])*(2*block_divergences+(Ls-rA[ir]-1)*block_divergences^2)*exp(log(1-block_divergences)*rA[ir]))
 }
 for (iL in 1:length(Ls)) 
 {
-  ir <- which(Ls[iL]<=rB[2:length(rB)] & Ls[iL]>=rB[1:(length(rB)-1)])
-  mBlocks[ir] <- mBlocks[ir] + exp(-block_divergences[iL]*Ls[iL])/diff(rB)[ir]
+  mBlocks[Ls[iL]+1] <- mBlocks[Ls[iL]+1] + exp(log(1-block_divergences[iL])*Ls[iL])
 }
+p <- weighted.hist(rA,w=mBlocks,breaks=rB,plot=FALSE)
+mBlocks <- p$counts/diff(rB)
 
 Ktot <- sum(Ls)
-mExp <- (2*divergence+(Ktot-rV)*divergence^2)*(1-divergence)^(rV)
-dat <- data.frame(rV=rV,mE=pH$counts/diff(rB),mPT=mPT, mExp=mExp,mBlocks=mBlocks,m_PT_numeric=m_PT_numeric)
+mExp <- (2*divergence+(Ktot-rA)*divergence^2)*(1-divergence)^(rA)
+p <- weighted.hist(rA,w=mExp,breaks=rB,plot=FALSE)
+mExp <- p$counts/diff(rB)
+
+dat <- data.frame(rV=rV,mE=mE,mPT=mPT, mExp=mExp,mBlocks=mBlocks)
 ```
 
 
@@ -251,7 +251,7 @@ dat <- data.frame(rV=rV,mE=pH$counts/diff(rB),mPT=mPT, mExp=mExp,mBlocks=mBlocks
 Plotting empirical and pseudotheoretical MLDs: 
 ```{r mld,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=4, fig.height=4}
 ggplot(data=dat, aes(rV, mE)) + 
-          geom_line(aes(rV, mPT),col="blue", size=0.2) +
+          geom_line(aes(rV, mPT),col="blue", size=0.5) +
           geom_line(aes(rV, mExp),col="grey", size=0.5,linetype = "solid") +
           geom_line(aes(rV, mBlocks),col="red", size=0.2) +
           # geom_line(aes(rV, m_PT_numeric),col="green", size=0.2) +

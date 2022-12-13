@@ -1,6 +1,6 @@
 segmut
 ================
-2022-12-12
+2022-12-13
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
@@ -61,6 +61,14 @@ library(scales)
 library(ggExtra)
 library(stringi)
 library(ggplot2)
+library(plotrix)
+#> 
+#> Attaching package: 'plotrix'
+#> 
+#> The following object is masked from 'package:scales':
+#> 
+#>     rescale
+options(warn=-1)
 ```
 
 To set parameters
@@ -88,13 +96,13 @@ breaks:
 To find optimal breaks locations given `n=3` number of breaks
 
 ``` r
-res <- getBreaksChiSquare(muts = muts, L = L, Kmin=Kmin, n=3)
+res <- suppressWarnings(getBreaksChiSquare(muts = muts, L = L, Kmin=Kmin, n=3))
 ```
 
 To plot the results
 
 ``` r
-breaks0L <- sort(c(0,res$optim$bestmem,L))
+breaks0L <- sort(c(0,res,L))
 colors <- brewer.pal(name="Paired", n=length(breaks0L)-1)
 par(mar=c(2,0,0,0))
 plot(muts,rep(0,length(muts)),pch=".", cex = 1.5,ylim=c(-0.06,0.01),ylab="",xlab="", axes=F)
@@ -115,7 +123,7 @@ breaks and their locations:
 To find optimal number of breaks
 
 ``` r
-breaks <- getNumberBreaksChiSquare(muts,L=L,Kmin=Kmin)
+breaks <- suppressWarnings(getNumberBreaksChiSquare(muts,L=L,Kmin=Kmin))
 ```
 
 To plot the results
@@ -136,6 +144,8 @@ for (i in 1:(length(breaks0L)-1))
 
 ## Example with Escherichia coli (NZ_CP033020.1) vs. Salmonella enterica (NZ_AP026948) alignment
 
+### Alignment of the genomes
+
 We align two bacterial genomes using nucmer and get all the alignment
 blocks and the mutations
 
@@ -146,14 +156,41 @@ file2 <- paste0(datadir,"Salmonella_enterica_1.fasta")
 system(paste0("nucmer --mum --prefix=",datadir,"align ",file1," ",file2), intern = TRUE, wait=TRUE)
 #> character(0)
 alignment <- system(paste0("show-aligns -w 500000 ", datadir,"align.delta NZ_CP033020.1 NZ_AP026948.1"), intern = TRUE, wait=TRUE)
-alignment <- alignment[str_detect(alignment,"\\^")]
-alignment <- lapply(1:length(alignment),function(i){gsub("(\\^)\\1{1,}", "\\1", alignment[[i]])}) # removing adjacent mutations
-divergence <- sum(str_count(alignment,"\\^"))/sum(nchar(alignment))
-block_divergences <- (str_count(alignment,"\\^"))/(nchar(alignment))
-Ls <- nchar(alignment)
-r <- stri_locate_all(pattern = '^', alignment, fixed = TRUE)
-rs <- c()
-for (i in order(-nchar(alignment))) rs <- c(rs,diff(r[[i]][,1]))
+alignment <- substr(alignment,12,nchar(alignment)) # removing empty space in the front
+
+# replace long indels by 1bp indel to make sure that (1 indel = 1 mutation)
+Ls <- c()
+number_muts <- c()
+r <- c()
+mutsS <- list()
+for (i in seq(11,length(alignment),9))
+{
+  str1 <- str_split(alignment[[i-2]],"")[[1]]
+  str2 <- str_split(alignment[[i-1]],"")[[1]]
+  strmuts <- str_split(alignment[[i]],"")[[1]]
+  Ind <- which(str1[1:(length(str1)-1)]=="." & str1[2:length(str1)]==".")
+  while (length(Ind)>0)
+  {
+    str1 <- str1[-Ind]
+    str2 <- str2[-Ind]
+    strmuts <- strmuts[-Ind]
+    Ind <- which(str1[1:(length(str1)-1)]=="." & str1[2:length(str1)]==".")
+  }
+  Ind <- which(str2[1:(length(str2)-1)]=="." & str2[2:length(str2)]==".")
+  while (length(Ind)>0)
+  {
+    str1 <- str1[-Ind]
+    str2 <- str2[-Ind]
+    strmuts <- strmuts[-Ind]
+    Ind <- which(str2[1:(length(str2)-1)]=="." & str2[2:length(str2)]==".")
+  }
+  Ls <- c(Ls,length(strmuts))
+  number_muts <- c(number_muts,sum(strmuts=="^"))
+  r <- c(r,diff(c(0,which(strmuts=="^"),length(strmuts)+1))-1)
+  mutsS[[length(mutsS)+1]] <- which(strmuts=="^")
+}
+block_divergences <- number_muts/Ls
+divergence <- sum(number_muts)/sum(Ls)
 ```
 
 Plotting divergences and lengths of the alignment blocks (not segmented
@@ -170,7 +207,9 @@ p <- ggplot(data=data.frame(Ls=Ls,block_divergences=block_divergences), aes(Ls, 
 ```
 
 <img src="man/figures/README-blocks-1.png" width="100%" /> In total
-there are 733 blocks with the total length of 1746795 bp.
+there are 739 blocks with the total length of 1769587 bp.
+
+### Segmentation of the genomes
 
 Segmenting the blocks using segmut package:
 
@@ -178,12 +217,11 @@ Segmenting the blocks using segmut package:
 Ks <- c()
 taus <- c()
 start_time <- Sys.time()
-for (i in order(-nchar(alignment)))
+for (i in order(-Ls))
 {
-  L <- nchar(alignment[[i]])
-  rtemp <- r[[i]][,1]
-  muts <- sort(rtemp + sample(0:0,length(rtemp),replace=TRUE))
-  breaks <- sort(getNumberBreaksChiSquare(muts,L=L,Kmin=Kmin))
+  muts <- mutsS[[i]]
+  L <- Ls[[i]]
+  breaks <- sort(suppressWarnings(getNumberBreaksChiSquare(muts=muts,L=L,Kmin=Kmin)))
   breaks0L <- c(0,breaks,L)
   for (j in 1:(length(breaks0L)-1))
   {
@@ -193,8 +231,10 @@ for (i in order(-nchar(alignment)))
 }
 end_time <- Sys.time()
 print(end_time - start_time)
-#> Time difference of 6.947899 mins
+#> Time difference of 56.42706 secs
 ```
+
+In total there are 2128 segments.
 
 Plotting divergences and lengths of the segments:
 
@@ -214,54 +254,53 @@ p <- ggplot(data=data.frame(Ks=Ks,taus=taus), aes(Ks, taus)) +
 Calculating empirical and pseudotheoretical MLDs:
 
 ``` r
-rB <- c(seq(0.5,35.5,3),10^seq(log10(35.5)+0.1,4.8,0.1))
+rB <- c(seq(-0.5,35.5,3),10^seq(log10(35.5)+0.1,4.8,0.1))
 rV <- 0.5*(rB[-length(rB)]+rB[-1])
-pH <- hist(rs,breaks=rB,plot=FALSE)
+p <- hist(r,breaks=rB,plot=FALSE)
+mE <- p$counts/diff(rB)
 
-mPT <- rV*0
-for (ir in 1:length(rV)) 
+
+rA <- 0:max(Ls+1)
+mPT <- rA*0
+for (ir in 1:length(rA)) 
 {
-  mPT[ir] <- sum((Ks>rV[ir])*(2*taus+(Ks-rV[ir])*taus^2)*exp(-rV[ir]*taus))
+    mPT[ir] <- sum((Ks>rA[ir])*(2*taus+(Ks-rA[ir]-1)*taus^2)*exp(log(1-taus)*rA[ir]))
 }
 for (iK in 1:length(Ks)) 
 {
-  ir <- which(Ks[iK]<=rB[2:length(rB)] & Ks[iK]>=rB[1:(length(rB)-1)])
-  mPT[ir] <- mPT[ir] + exp(-taus[iK]*Ks[iK])/diff(rB)[ir]
+  mPT[Ks[iK]+1] <- mPT[Ks[iK]+1] + exp(log(1-taus[iK])*Ks[iK])
 }
+p <- weighted.hist(rA,w=mPT,breaks=rB,plot=FALSE)
+mPT <- p$counts/diff(rB)
 
-genome <- c()
-for (iK in 1:length(Ks)) 
+mBlocks <- rA*0
+for (ir in 1:length(rA)) 
 {
-  genome <- c(genome,runif(Ks[iK])>exp(-taus[iK]))
-}
-r_fromtau <- diff(sort(which(genome)))
-m_PT_numeric <- hist(r_fromtau,breaks=rB,plot=FALSE)$counts/diff(rB)
-
-
-mBlocks <- rV*0
-for (ir in 1:length(rV)) 
-{
-  mBlocks[ir] <- sum((Ls>rV[ir])*(2*block_divergences+(Ls-rV[ir])*block_divergences^2)*exp(-rV[ir]*block_divergences))
+  mBlocks[ir] <- sum((Ls>rA[ir])*(2*block_divergences+(Ls-rA[ir]-1)*block_divergences^2)*exp(log(1-block_divergences)*rA[ir]))
 }
 for (iL in 1:length(Ls)) 
 {
-  ir <- which(Ls[iL]<=rB[2:length(rB)] & Ls[iL]>=rB[1:(length(rB)-1)])
-  mBlocks[ir] <- mBlocks[ir] + exp(-block_divergences[iL]*Ls[iL])/diff(rB)[ir]
+  mBlocks[Ls[iL]+1] <- mBlocks[Ls[iL]+1] + exp(log(1-block_divergences[iL])*Ls[iL])
 }
+p <- weighted.hist(rA,w=mBlocks,breaks=rB,plot=FALSE)
+mBlocks <- p$counts/diff(rB)
 
 Ktot <- sum(Ls)
-mExp <- (2*divergence+(Ktot-rV)*divergence^2)*exp(-rV*divergence)
-dat <- data.frame(rV=rV,mE=pH$counts/diff(rB),mPT=mPT, mExp=mExp,mBlocks=mBlocks,m_PT_numeric=m_PT_numeric)
+mExp <- (2*divergence+(Ktot-rA)*divergence^2)*(1-divergence)^(rA)
+p <- weighted.hist(rA,w=mExp,breaks=rB,plot=FALSE)
+mExp <- p$counts/diff(rB)
+
+dat <- data.frame(rV=rV,mE=mE,mPT=mPT, mExp=mExp,mBlocks=mBlocks)
 ```
 
 Plotting empirical and pseudotheoretical MLDs:
 
 ``` r
 ggplot(data=dat, aes(rV, mE)) + 
-          geom_line(aes(rV, mPT),col="blue", size=0.2) +
+          geom_line(aes(rV, mPT),col="blue", size=0.5) +
           geom_line(aes(rV, mExp),col="grey", size=0.5,linetype = "solid") +
           geom_line(aes(rV, mBlocks),col="red", size=0.2) +
-          geom_line(aes(rV, m_PT_numeric),col="green", size=0.2) +
+          # geom_line(aes(rV, m_PT_numeric),col="green", size=0.2) +
           scale_x_continuous(limits = c(1e0, 1e3),trans='log10',breaks = 10^(-10:10), labels = trans_format("log10", math_format(10^.x))) +
           scale_y_continuous(limits = c(1e-3, 1e5),trans='log10',breaks = 10^(-10:10), labels = trans_format("log10", math_format(10^.x))) +
           geom_line(aes(rV,1e8/rV^3),linetype = "dashed") + 
