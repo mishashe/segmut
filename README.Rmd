@@ -38,7 +38,7 @@ devtools::install_github("mishashe/segmut")
 ```
 
 To load nessesary libraries:
-```{r libraries, echo=TRUE, results='hide'}
+```{r libraries, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
 library(segmut)
 library(DEoptim, quietly=T) # to find optimal break points using differential evolution algorithm
 library(RColorBrewer, quietly=T) # to plot results
@@ -57,7 +57,7 @@ Kmin <- 20
 ```
 
 To generate example of genome of length ```L``` with vector of mutation locations ```muts```:
-```{r genome example}
+```{r genome example, message=FALSE, warning=FALSE}
 L <- 4000
 muts <- sort(c(sample(1:700,700*0.1),
                sample(701:2000,2300*0.2),
@@ -72,9 +72,10 @@ This is a basic example which shows you how to find positions of ```n=3``` break
 To find optimal breaks locations given ```n=3``` number of breaks
 ```{r find optimal breaks}
 res <- suppressWarnings(getBreaksChiSquare(muts = muts, L = L, Kmin=Kmin, n=3))
+print(res)
 ```
 To plot the results
-```{r plot results,fig.width=10, fig.height=0.5}
+```{r plot results,fig.width=10, fig.height=0.5, message=FALSE, warning=FALSE}
 breaks0L <- sort(c(0,res,L))
 colors <- brewer.pal(name="Paired", n=length(breaks0L)-1)
 par(mar=c(2,0,0,0))
@@ -91,12 +92,13 @@ for (i in 1:(length(breaks0L)-1))
 This is a basic example which shows you how to find optimal number of breaks and their locations:
 
 To find optimal number of breaks
-```{r find optimal number of breaks}
-breaks <- suppressWarnings(getNumberBreaksChiSquare(muts,L=L,Kmin=Kmin))
+```{r find optimal number of breaks, message=FALSE, warning=FALSE}
+res <- suppressWarnings(getNumberBreaksChiSquare(muts,L=L,Kmin=Kmin))
+print(res)
 ```
 To plot the results
 ```{r plot best results,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE}
-breaks0L <- sort(c(0,breaks,L))
+breaks0L <- sort(c(0,res,L))
 colors <- brewer.pal(name="Paired", n=length(breaks0L)-1)
 par(mar=c(2,0,0,0))
 plot(muts,rep(0,length(muts)),pch=".", cex = 1.5,ylim=c(-0.06,0.01),ylab="",xlab="", axes=F)
@@ -249,7 +251,7 @@ dat <- data.frame(rV=rV,mE=mE,mPT=mPT, mExp=mExp,mBlocks=mBlocks)
 
 
 Plotting empirical and pseudotheoretical MLDs: 
-```{r mld,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=4, fig.height=4}
+```{r mld,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=6, fig.height=6}
 ggplot(data=dat, aes(rV, mE)) + 
           geom_line(aes(rV, mPT),col="blue", size=0.5) +
           geom_line(aes(rV, mExp),col="grey", size=0.5,linetype = "solid") +

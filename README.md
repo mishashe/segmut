@@ -30,44 +30,14 @@ To load nessesary libraries:
 ``` r
 library(segmut)
 library(DEoptim, quietly=T) # to find optimal break points using differential evolution algorithm
-#> 
-#> DEoptim package
-#> Differential Evolution algorithm in R
-#> Authors: D. Ardia, K. Mullen, B. Peterson and J. Ulrich
 library(RColorBrewer, quietly=T) # to plot results
 library(stringr)
 library(tidyverse)
-#> ── Attaching packages
-#> ───────────────────────────────────────
-#> tidyverse 1.3.2 ──
-#> ✔ ggplot2 3.4.0      ✔ purrr   0.3.5 
-#> ✔ tibble  3.1.8      ✔ dplyr   1.0.10
-#> ✔ tidyr   1.2.1      ✔ forcats 0.5.2 
-#> ✔ readr   2.1.3      
-#> ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-#> ✖ dplyr::filter() masks stats::filter()
-#> ✖ dplyr::lag()    masks stats::lag()
 library(scales)
-#> 
-#> Attaching package: 'scales'
-#> 
-#> The following object is masked from 'package:purrr':
-#> 
-#>     discard
-#> 
-#> The following object is masked from 'package:readr':
-#> 
-#>     col_factor
 library(ggExtra)
 library(stringi)
 library(ggplot2)
 library(plotrix)
-#> 
-#> Attaching package: 'plotrix'
-#> 
-#> The following object is masked from 'package:scales':
-#> 
-#>     rescale
 options(warn=-1)
 ```
 
@@ -97,6 +67,9 @@ To find optimal breaks locations given `n=3` number of breaks
 
 ``` r
 res <- suppressWarnings(getBreaksChiSquare(muts = muts, L = L, Kmin=Kmin, n=3))
+print(res)
+#> par1 par2 par3 
+#>  701 2005 3312
 ```
 
 To plot the results
@@ -123,13 +96,16 @@ breaks and their locations:
 To find optimal number of breaks
 
 ``` r
-breaks <- suppressWarnings(getNumberBreaksChiSquare(muts,L=L,Kmin=Kmin))
+res <- suppressWarnings(getNumberBreaksChiSquare(muts,L=L,Kmin=Kmin))
+print(res)
+#>      par1      par2      par3      par4 
+#>  700.9966 1970.9991 2005.0004 3312.0117
 ```
 
 To plot the results
 
 ``` r
-breaks0L <- sort(c(0,breaks,L))
+breaks0L <- sort(c(0,res,L))
 colors <- brewer.pal(name="Paired", n=length(breaks0L)-1)
 par(mar=c(2,0,0,0))
 plot(muts,rep(0,length(muts)),pch=".", cex = 1.5,ylim=c(-0.06,0.01),ylab="",xlab="", axes=F)
@@ -231,10 +207,10 @@ for (i in order(-Ls))
 }
 end_time <- Sys.time()
 print(end_time - start_time)
-#> Time difference of 56.42706 secs
+#> Time difference of 1.794904 mins
 ```
 
-In total there are 2128 segments.
+In total there are 2219 segments.
 
 Plotting divergences and lengths of the segments:
 

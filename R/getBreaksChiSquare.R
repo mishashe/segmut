@@ -42,14 +42,15 @@ getChiSquare <- function(par,muts,L=max(muts)-min(muts)+1,Kmin=0)
 #'
 getBreaksChiSquare <- function(muts,L=max(muts)-min(muts)+1,Kmin=0,n=1)
 {
-  initialpop <- Kmin + 1 + matrix(runif(10*1*n)*(L-Kmin-1),ncol=n)
+  initialpop <- Kmin + 1 + matrix(runif(20*1*n)*(L-2*Kmin-3),ncol=n)
   if (n>1) initialpop=t(apply(initialpop,1,sort))
   res <- DEoptim(getChiSquare, lower = rep(Kmin,n), upper = rep(L-Kmin,n),
                  control = DEoptim.control(trace = FALSE,
                                            parallelType='none',
                                            strategy = 1,
                                            initialpop=initialpop,
-                                           storepopfreq = 10000),
+                                           storepopfreq = 10000,
+                                           reltol=1e-6),
                  muts=muts,L=L,Kmin=Kmin)$optim$bestmem
   return(res)
 }
