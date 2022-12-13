@@ -20,10 +20,10 @@ getChiSquare <- function(par,muts,L=max(muts)-min(muts)+1,Kmin=0)
   xB <- c(0,par,L)
   Ks <- diff(xB)
   if (any(Ks<Kmin)) return(Inf)
-  averageDivergence <- length(muts)/L
+  expected <- length(muts)/L*Ks
   # nmuts <- .Internal(tabulate(.Internal(findInterval(vec=xB,x=muts, FALSE,FALSE,FALSE)), nbins=length(xB)-1))
   nmuts <- .Call(graphics:::C_BinCount, muts, xB, TRUE, TRUE) # a bit faster than nmuts <- hist(muts,breaks=xB,plot=FALSE)$counts
-  D <- sum((nmuts - Ks*averageDivergence)^2/(Ks*averageDivergence))
+  D <- sum((nmuts - expected)^2/expected)
   return(length(par)*log(length(muts))-D)
 }
 
@@ -42,7 +42,7 @@ getChiSquare <- function(par,muts,L=max(muts)-min(muts)+1,Kmin=0)
 #'
 getBreaksChiSquare <- function(muts,L=max(muts)-min(muts)+1,Kmin=0,n=1)
 {
-  res <- DEoptim(getChiSquare, lower = rep(0,n), upper = rep(L,n),
+  res <- DEoptim(getChiSquare, lower = seq(1,n,1)*Kmin, upper = L-seq(n,1,-1)*Kmin,
                  control = DEoptim.control(trace = 0,parallelType='none'),
                  muts=muts,L=L,Kmin=Kmin)
   return(res)

@@ -60,6 +60,7 @@ library(scales)
 #>     col_factor
 library(ggExtra)
 library(stringi)
+library(ggplot2)
 ```
 
 To set parameters
@@ -192,7 +193,7 @@ for (i in order(-nchar(alignment)))
 }
 end_time <- Sys.time()
 print(end_time - start_time)
-#> Time difference of 6.638279 mins
+#> Time difference of 6.947899 mins
 ```
 
 Plotting divergences and lengths of the segments:
@@ -228,6 +229,15 @@ for (iK in 1:length(Ks))
   mPT[ir] <- mPT[ir] + exp(-taus[iK]*Ks[iK])/diff(rB)[ir]
 }
 
+genome <- c()
+for (iK in 1:length(Ks)) 
+{
+  genome <- c(genome,runif(Ks[iK])>exp(-taus[iK]))
+}
+r_fromtau <- diff(sort(which(genome)))
+m_PT_numeric <- hist(r_fromtau,breaks=rB,plot=FALSE)$counts/diff(rB)
+
+
 mBlocks <- rV*0
 for (ir in 1:length(rV)) 
 {
@@ -241,7 +251,7 @@ for (iL in 1:length(Ls))
 
 Ktot <- sum(Ls)
 mExp <- (2*divergence+(Ktot-rV)*divergence^2)*exp(-rV*divergence)
-dat <- data.frame(rV=rV,mE=pH$counts/diff(rB),mPT=mPT, mExp=mExp,mBlocks=mBlocks)
+dat <- data.frame(rV=rV,mE=pH$counts/diff(rB),mPT=mPT, mExp=mExp,mBlocks=mBlocks,m_PT_numeric=m_PT_numeric)
 ```
 
 Plotting empirical and pseudotheoretical MLDs:
@@ -251,13 +261,23 @@ ggplot(data=dat, aes(rV, mE)) +
           geom_line(aes(rV, mPT),col="blue", size=0.2) +
           geom_line(aes(rV, mExp),col="grey", size=0.5,linetype = "solid") +
           geom_line(aes(rV, mBlocks),col="red", size=0.2) +
-          theme_bw() +
+          geom_line(aes(rV, m_PT_numeric),col="green", size=0.2) +
           scale_x_continuous(limits = c(1e0, 1e3),trans='log10',breaks = 10^(-10:10), labels = trans_format("log10", math_format(10^.x))) +
           scale_y_continuous(limits = c(1e-3, 1e5),trans='log10',breaks = 10^(-10:10), labels = trans_format("log10", math_format(10^.x))) +
           geom_line(aes(rV,1e8/rV^3),linetype = "dashed") + 
           geom_line(aes(rV,1e10/rV^4),linetype = "dotted") + 
           geom_point(size=2,shape='o') +
-          xlab("r") + ylab("m(r)") 
+      labs(y="r", x = "m(r)",
+       title="match length distribution",
+       subtitle="subtitle",
+       caption="Here the circles correspond to the empirical MLD, grey line to the theoretical precition based on the average genome diversity, red line to the theoretical precition based on the average diversity of the alignment blocks, blue line to the theoretical precition based on the diversity of calculated segments. Dashed and dotted lines represent the -3 and -4 power-law accordingly.", width = 10) +
+            theme_bw() +
+    theme(
+    plot.caption =
+      ggtext::element_textbox(
+        width = unit(.8, "npc"),
+        hjust = 0, vjust = 0,
+        halign = 0))
 ```
 
 <img src="man/figures/README-mld-1.png" width="100%" />
