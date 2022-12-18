@@ -1,8 +1,8 @@
 ---
 title: "segmut"
 output: 
-  github_document: default
   html_document: default
+  github_document: default
 date: "`r Sys.Date()`"
 ---
 
@@ -174,6 +174,7 @@ Segmenting the blocks using segmut package:
 ```{r breaking to segments,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=8, fig.height=8}
 Ks <- c()
 taus <- c()
+nmutsS <- c()
 start_time <- Sys.time()
 for (i in order(-Ls))
 {
@@ -184,9 +185,10 @@ for (i in order(-Ls))
   for (j in 1:(length(breaks0L)-1))
   {
     Ks <- c(Ks, breaks0L[j+1]-breaks0L[j]+1)
-    taus <- c(taus, sum(muts<breaks0L[j+1] & muts>breaks0L[j])/(breaks0L[j+1]-breaks0L[j]+1))
+    nmutsS <- c(nmutsS, sum(muts<breaks0L[j+1] & muts>breaks0L[j]))
   }
 }
+taus <- nmutsS/Ks
 end_time <- Sys.time()
 print(end_time - start_time)
 ```
@@ -212,19 +214,28 @@ rV <- 0.5*(rB[-length(rB)]+rB[-1])
 p <- hist(r,breaks=rB,plot=FALSE)
 mE <- p$counts/diff(rB)
 
-
 rA <- 0:max(Ls+1)
 mPT <- rA*0
+mPT_noK <- rA*0
+mPT_nmuts <- rA*0
 for (ir in 1:length(rA)) 
 {
     mPT[ir] <- sum((Ks>rA[ir])*(2*taus+(Ks-rA[ir]-1)*taus^2)*exp(log(1-taus)*rA[ir]))
+    mPT_noK[ir] <- sum(((Ks)*taus^2)*exp(log(1-taus)*rA[ir]))
+    mPT_nmuts[ir] <- sum((Ks>rA[ir])*nmutsS*(nmutsS+1)/(Ks-nmutsS)*(1-rA[ir]/(Ks-nmutsS))^(nmutsS-1))
 }
 for (iK in 1:length(Ks)) 
 {
   mPT[Ks[iK]+1] <- mPT[Ks[iK]+1] + exp(log(1-taus[iK])*Ks[iK])
+  mPT_nmuts[Ks[iK]+1] <- mPT_nmuts[Ks[iK]+1] + (nmutsS[iK]==0)
 }
 p <- weighted.hist(rA,w=mPT,breaks=rB,plot=FALSE)
 mPT <- p$counts/diff(rB)
+p <- weighted.hist(rA,w=mPT_noK,breaks=rB,plot=FALSE)
+mPT_noK <- p$counts/diff(rB)
+p <- weighted.hist(rA,w=mPT_nmuts,breaks=rB,plot=FALSE)
+mPT_nmuts <- p$counts/diff(rB)
+
 
 mBlocks <- rA*0
 for (ir in 1:length(rA)) 
@@ -243,7 +254,7 @@ mExp <- (2*divergence+(Ktot-rA)*divergence^2)*(1-divergence)^(rA)
 p <- weighted.hist(rA,w=mExp,breaks=rB,plot=FALSE)
 mExp <- p$counts/diff(rB)
 
-dat <- data.frame(rV=rV,mE=mE,mPT=mPT, mExp=mExp,mBlocks=mBlocks)
+dat <- data.frame(rV=rV,mE=mE,mPT=mPT, mExp=mExp,mBlocks=mBlocks,mPT_noK=mPT_noK,mPT_nmuts=mPT_nmuts)
 ```
 
 
@@ -253,16 +264,18 @@ dat <- data.frame(rV=rV,mE=mE,mPT=mPT, mExp=mExp,mBlocks=mBlocks)
 Plotting empirical and pseudotheoretical MLDs: 
 ```{r mld,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=6, fig.height=6}
 ggplot(data=dat, aes(rV, mE)) + 
-          geom_line(aes(rV, mPT),col="blue", size=0.5) +
-          geom_line(aes(rV, mExp),col="grey", size=0.5,linetype = "solid") +
-          geom_line(aes(rV, mBlocks),col="red", size=0.2) +
+          geom_line(aes(rV, mPT),col="blue", size=1) +
+          # geom_line(aes(rV, mPT_noK),col="blue", size=0.5,linetype = "dashed") +
+          geom_line(aes(rV, mPT_nmuts),col="orange", size=1,linetype = "solid") +
+          # geom_line(aes(rV, mExp),col="grey", size=0.5,linetype = "solid") +
+          # geom_line(aes(rV, mBlocks),col="red", size=0.2) +
           # geom_line(aes(rV, m_PT_numeric),col="green", size=0.2) +
-          scale_x_continuous(limits = c(1e0, 1e3),trans='log10',breaks = 10^(-10:10), labels = trans_format("log10", math_format(10^.x))) +
-          scale_y_continuous(limits = c(1e-3, 1e5),trans='log10',breaks = 10^(-10:10), labels = trans_format("log10", math_format(10^.x))) +
+          scale_x_continuous(limits = c(1e0, 1e5),trans='log10',breaks = 10^(-10:10), labels = trans_format("log10", math_format(10^.x))) +
+          scale_y_continuous(limits = c(1e-8, 1e5),trans='log10',breaks = 10^(-10:10), labels = trans_format("log10", math_format(10^.x))) +
           geom_line(aes(rV,1e8/rV^3),linetype = "dashed") + 
-          geom_line(aes(rV,1e10/rV^4),linetype = "dotted") + 
-          geom_point(size=2,shape='o') +
-      labs(y="r", x = "m(r)",
+          geom_line(aes(rV,1e11/rV^4),linetype = "dotted") + 
+          geom_point(size=4,shape='o') +
+      labs(x="r", y = "m(r)",
        title="match length distribution",
        subtitle="subtitle",
        caption="Here the circles correspond to the empirical MLD, grey line to the theoretical precition based on the average genome diversity, red line to the theoretical precition based on the average diversity of the alignment blocks, blue line to the theoretical precition based on the diversity of calculated segments. Dashed and dotted lines represent the -3 and -4 power-law accordingly.", width = 10) +
