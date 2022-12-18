@@ -68,8 +68,6 @@ To find optimal number of breaks
 
 ``` r
 res <- suppressWarnings(getNumberBreaksChiSquare(muts,L=L,Kmin=Kmin))
-# plot((0:(length(res[[2]])-1))[-c(1:2)],res[[2]][-c(1:2)])
-# print(res)
 ```
 
 To plot the results
@@ -196,10 +194,10 @@ for (i in order(-Ls))
 taus <- nmutsS/Ks
 end_time <- Sys.time()
 print(end_time - start_time)
-#> Time difference of 24.52232 mins
+#> Time difference of 23.3189 mins
 ```
 
-In total there are 2600 segments.
+In total there are 2546 segments.
 
 Plotting divergences and lengths of the segments:
 
@@ -312,9 +310,9 @@ start_time <- Sys.time()
 breaks <- suppressWarnings(getNumberBreaksChiSquare(muts=muts,L=L,Kmin=Kmin))
 gc()
 #>           used  (Mb) gc trigger  (Mb) max used  (Mb)
-#> Ncells 2650633 141.6    4852485 259.2  4852485 259.2
-#> Vcells 5939262  45.4   12255594  93.6 12255594  93.6
-plot(breaks[[2]][3:length(breaks[[2]])])
+#> Ncells 2651641 141.7    4431162 236.7  4431162 236.7
+#> Vcells 5940293  45.4   12256775  93.6 12256775  93.6
+plot(breaks[3:length(breaks)])
 ```
 
 <img src="man/figures/README-human breaking to segments-1.png" width="100%" />
@@ -330,7 +328,7 @@ for (j in 1:(length(breaks0L)-1))
 taus <- nmutsS/Ks
 end_time <- Sys.time()
 print(end_time - start_time)
-#> Time difference of 2.068299 mins
+#> Time difference of 55.42389 secs
 
 colors <- rep(brewer.pal(name="Paired", n=8),round(length(breaks0L)/8+1))
 par(mar=c(2,0,0,0))

@@ -73,8 +73,7 @@ This is a basic example which shows you how to find optimal number of breaks and
 To find optimal number of breaks
 ```{r find optimal number of breaks, message=FALSE, warning=FALSE}
 res <- suppressWarnings(getNumberBreaksChiSquare(muts,L=L,Kmin=Kmin))
-# plot((0:(length(res[[2]])-1))[-c(1:2)],res[[2]][-c(1:2)])
-# print(res)
+
 ```
 
 To plot the results
@@ -298,7 +297,7 @@ nmutsS <- c()
 start_time <- Sys.time()
 breaks <- suppressWarnings(getNumberBreaksChiSquare(muts=muts,L=L,Kmin=Kmin))
 gc()
-plot(breaks[[2]][3:length(breaks[[2]])])
+plot(breaks[3:length(breaks)])
 
 breaks0L <- c(0,sort(breaks),L)
 for (j in 1:(length(breaks0L)-1))
