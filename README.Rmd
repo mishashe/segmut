@@ -1,8 +1,8 @@
 ---
 title: "segmut"
 output: 
-  html_document: default
   github_document: default
+  html_document: default
 date: "`r Sys.Date()`"
 ---
 
@@ -34,13 +34,13 @@ You can install the development version of segmut from [GitHub](https://github.c
 # install.packages("devtools")
 # Sys.unsetenv("GITHUB_PAT")
 # install.packages("/home/misha/Documents/Development/segmut/", repos = NULL, type = "source",force=TRUE)
-devtools::install_github("mishashe/segmut")
+# devtools::install_github("mishashe/segmut")
 ```
 
 To load nessesary libraries:
 ```{r libraries, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
 library(segmut)
-library(DEoptim, quietly=T) # to find optimal break points using differential evolution algorithm
+library(GA, quietly=T) # to find optimal break points using differential evolution algorithm
 library(RColorBrewer, quietly=T) # to plot results
 library(stringr)
 library(tidyverse)
@@ -49,11 +49,12 @@ library(ggExtra)
 library(stringi)
 library(ggplot2)
 library(plotrix)
+library(dfoptim)
 options(warn=-1)
 ```
 To set parameters
 ```{r set parameters}
-Kmin <- 50
+Kmin <- 30
 ```
 
 To generate example of genome of length ```L``` with vector of mutation locations ```muts```:
@@ -65,28 +66,6 @@ muts <- sort(c(sample(1:700,700*0.1),
                sample(3201:4000,800*0.08)))
 ```
 
-## Example with known number of breaks ```n=3```
-
-This is a basic example which shows you how to find positions of ```n=3``` breaks:
-
-To find optimal breaks locations given ```n=3``` number of breaks
-```{r find optimal breaks}
-res <- suppressWarnings(getBreaksChiSquare(muts = muts, L = L, Kmin=Kmin, n=3))
-print(res)
-```
-To plot the results
-```{r plot results,fig.width=10, fig.height=0.5, message=FALSE, warning=FALSE}
-breaks0L <- sort(c(0,res,L))
-colors <- brewer.pal(name="Paired", n=length(breaks0L)-1)
-par(mar=c(2,0,0,0))
-plot(muts,rep(0,length(muts)),pch=".", cex = 1.5,ylim=c(-0.06,0.01),ylab="",xlab="", axes=F)
-axis(side=1, at=c(0,700,2000,3200,L))
-for (i in 1:(length(breaks0L)-1))
-{
-  lines(c(breaks0L[i],breaks0L[i+1]),c(-0.05,-0.05),col=colors[i], lwd=5)
-}
-```
-
 ## Example with unknown number of breaks
 
 This is a basic example which shows you how to find optimal number of breaks and their locations:
@@ -94,8 +73,10 @@ This is a basic example which shows you how to find optimal number of breaks and
 To find optimal number of breaks
 ```{r find optimal number of breaks, message=FALSE, warning=FALSE}
 res <- suppressWarnings(getNumberBreaksChiSquare(muts,L=L,Kmin=Kmin))
-print(res)
+# plot((0:(length(res[[2]])-1))[-c(1:2)],res[[2]][-c(1:2)])
+# print(res)
 ```
+
 To plot the results
 ```{r plot best results,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE}
 breaks0L <- sort(c(0,res,L))
@@ -109,6 +90,18 @@ for (i in 1:(length(breaks0L)-1))
 }
 ```
 
+To plot the density results
+```{r plot density results,fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
+ma <- stats::filter(1:L %in% muts, rep(1 / 200, 200), sides = 2,circular=FALSE)
+plot(ma)   
+axis(side=1, at=c(0,700,2000,3200,L))
+for (i in 1:(length(breaks0L)-1))
+{
+  lines(c(breaks0L[i],breaks0L[i+1]),c(length(muts)/L,length(muts)/L),col=colors[i], lwd=5)
+}
+```
+
+
 ## Example with Escherichia coli (NZ_CP033020.1) vs. Salmonella enterica (NZ_AP026948) alignment
 
 ### Alignment of the genomes
@@ -118,7 +111,7 @@ We align two bacterial genomes using nucmer and get all the alignment blocks and
 datadir <- "/home/misha/Documents/Development/segmut/data/"
 file1 <- paste0(datadir,"Escherichia_coli_1.fasta")
 file2 <- paste0(datadir,"Salmonella_enterica_1.fasta")
-system(paste0("nucmer --mum --prefix=",datadir,"align ",file1," ",file2), intern = TRUE, wait=TRUE)
+# system(paste0("nucmer --mum --prefix=",datadir,"align ",file1," ",file2), intern = TRUE, wait=TRUE)
 alignment <- system(paste0("show-aligns -w 500000 ", datadir,"align.delta NZ_CP033020.1 NZ_AP026948.1"), intern = TRUE, wait=TRUE)
 alignment <- substr(alignment,12,nchar(alignment)) # removing empty space in the front
 
@@ -176,12 +169,15 @@ Ks <- c()
 taus <- c()
 nmutsS <- c()
 start_time <- Sys.time()
+k <- 0
 for (i in order(-Ls))
 {
+  k <- k+1
+  setTxtProgressBar(txtProgressBar(min = 0,max = length(Ls),style = 3,width = 50,char = "="), k)
   muts <- mutsS[[i]]
   L <- Ls[[i]]
-  breaks <- sort(suppressWarnings(getNumberBreaksChiSquare(muts=muts,L=L,Kmin=Kmin)))
-  breaks0L <- c(0,breaks,L)
+  breaks <- suppressWarnings(getNumberBreaksChiSquare(muts=muts,L=L,Kmin=Kmin))
+  breaks0L <- c(0,sort(breaks),L)
   for (j in 1:(length(breaks0L)-1))
   {
     Ks <- c(Ks, breaks0L[j+1]-breaks0L[j]+1)
@@ -266,7 +262,7 @@ Plotting empirical and pseudotheoretical MLDs:
 ggplot(data=dat, aes(rV, mE)) + 
           geom_line(aes(rV, mPT),col="blue", size=1) +
           # geom_line(aes(rV, mPT_noK),col="blue", size=0.5,linetype = "dashed") +
-          geom_line(aes(rV, mPT_nmuts),col="orange", size=1,linetype = "solid") +
+          # geom_line(aes(rV, mPT_nmuts),col="orange", size=1,linetype = "solid") +
           # geom_line(aes(rV, mExp),col="grey", size=0.5,linetype = "solid") +
           # geom_line(aes(rV, mBlocks),col="red", size=0.2) +
           # geom_line(aes(rV, m_PT_numeric),col="green", size=0.2) +
@@ -290,6 +286,94 @@ ggplot(data=dat, aes(rV, mE)) +
 
 
 
+## Segmentation of the human genome (chr1)
+Segmenting using segmut package:
+```{r human breaking to segments,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=8, fig.height=8}
+muts <- sort(read.table(paste0("/home/misha/Documents/Development/segmut/data/HG02715_1_1_250000000.txt"), header = FALSE, sep = "\t",row.names=NULL)$V1)
+muts <- muts[muts<1e6]
+L <- max(muts) + 1 
+Ks <- c()
+taus <- c()
+nmutsS <- c()
+start_time <- Sys.time()
+breaks <- suppressWarnings(getNumberBreaksChiSquare(muts=muts,L=L,Kmin=Kmin))
+gc()
+plot(breaks[[2]][3:length(breaks[[2]])])
+
+breaks0L <- c(0,sort(breaks),L)
+for (j in 1:(length(breaks0L)-1))
+{
+  Ks <- c(Ks, breaks0L[j+1]-breaks0L[j]+1)
+  nmutsS <- c(nmutsS, sum(muts<breaks0L[j+1] & muts>breaks0L[j]))
+}
+taus <- nmutsS/Ks
+end_time <- Sys.time()
+print(end_time - start_time)
+
+colors <- rep(brewer.pal(name="Paired", n=8),round(length(breaks0L)/8+1))
+par(mar=c(2,0,0,0))
+
+plot(density(muts, bw = 1000))   
+for (i in 1:(length(breaks0L)-1))
+{
+  lines(c(breaks0L[i],breaks0L[i+1]),c(4e-8,4e-8),col=colors[i], lwd=5)
+}
+```
+
+Calculating empirical and pseudotheoretical MLDs: 
+```{r calc mld chr1 ,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=2, fig.height=2}
+r <- diff(muts)
+rB <- c(seq(-0.5,35.5,3),10^seq(log10(35.5)+0.1,7.8,0.1))
+rV <- 0.5*(rB[-length(rB)]+rB[-1])
+p <- hist(r,breaks=rB,plot=FALSE)
+mE <- p$counts/diff(rB)
+
+rA <- 0:max(r+1)
+mPT <- rA*0
+for (ir in 1:length(rA)) 
+{
+    mPT[ir] <- sum((Ks>rA[ir])*(2*taus+(Ks-rA[ir]-1)*taus^2)*exp(log(1-taus)*rA[ir]))
+}
+for (iK in 1:length(Ks)) 
+{
+  mPT[Ks[iK]+1] <- mPT[Ks[iK]+1] + exp(log(1-taus[iK])*Ks[iK])
+}
+mPT[is.na(mPT)] <- 0
+p <- weighted.hist(rA,w=mPT,breaks=rB,plot=FALSE)
+mPT <- p$counts/diff(rB)
 
 
 
+dat <- data.frame(rV=rV,mE=mE,mPT=mPT)
+```
+
+
+
+
+
+Plotting empirical and pseudotheoretical MLDs: 
+```{r mld chr1,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=6, fig.height=6}
+ggplot(data=dat, aes(rV, mE)) + 
+          geom_line(aes(rV, mPT),col="blue", size=1) +
+          # geom_line(aes(rV, mPT_noK),col="blue", size=0.5,linetype = "dashed") +
+          # geom_line(aes(rV, mPT_nmuts),col="orange", size=1,linetype = "solid") +
+          # geom_line(aes(rV, mExp),col="grey", size=0.5,linetype = "solid") +
+          # geom_line(aes(rV, mBlocks),col="red", size=0.2) +
+          # geom_line(aes(rV, m_PT_numeric),col="green", size=0.2) +
+          scale_x_continuous(limits = c(1e0, 1e5),trans='log10',breaks = 10^(-10:10), labels = trans_format("log10", math_format(10^.x))) +
+          scale_y_continuous(limits = c(1e-8, 1e5),trans='log10',breaks = 10^(-10:10), labels = trans_format("log10", math_format(10^.x))) +
+          geom_line(aes(rV,1e8/rV^3),linetype = "dashed") + 
+          geom_line(aes(rV,1e11/rV^4),linetype = "dotted") + 
+          geom_point(size=4,shape='o') +
+      labs(x="r", y = "m(r)",
+       title="match length distribution",
+       subtitle="subtitle",
+       caption="Here the circles correspond to the empirical MLD, grey line to the theoretical precition based on the average genome diversity, red line to the theoretical precition based on the average diversity of the alignment blocks, blue line to the theoretical precition based on the diversity of calculated segments. Dashed and dotted lines represent the -3 and -4 power-law accordingly.", width = 10) +
+            theme_bw() +
+    theme(
+    plot.caption =
+      ggtext::element_textbox(
+        width = unit(.8, "npc"),
+        hjust = 0, vjust = 0,
+        halign = 0))
+```
