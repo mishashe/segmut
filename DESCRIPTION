@@ -8,7 +8,7 @@ Description: What the package does (one paragraph).
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.2
+RoxygenNote: 7.2.3
 Suggests: 
     purrr
 Imports: 
@@ -17,6 +17,11 @@ Imports:
     optimx,
     parallel,
     RColorBrewer,
-    stats
+    Rcpp,
+    stats,
+    RcppArmadillo
 URL: https://github.com/mishashe/segmut
 BugReports: https://github.com/mishashe/segmut/issues
+LinkingTo: 
+    Rcpp, RcppArmadillo
+Depends: RcppArmadillo

@@ -9,6 +9,9 @@ date: "`r Sys.Date()`"
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 ```{r, include = FALSE}
+## usethis namespace: start
+#' @importFrom Rcpp sourceCpp
+## usethis namespace: end
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -30,10 +33,19 @@ The goal of segmut is to segment genome with mutations to segments with signific
 You can install the development version of segmut from [GitHub](https://github.com/) with:
 
 ``` r
+# setwd("/home/misha/Documents/Development/segmut/")
+# RcppArmadillo::RcppArmadillo.package.skeleton()
+# tools::package_native_routine_registration_skeleton(".", character_only = FALSE)
+# pkgbuild::compile_dll(".",force = T)
+# Rcpp::compileAttributes()
+# devtools::document()
+
 # detach("package:segmut", unload=TRUE)
 # install.packages("devtools")
 # Sys.unsetenv("GITHUB_PAT")
 # install.packages("/home/misha/Documents/Development/segmut/", repos = NULL, type = "source",force=TRUE)
+# detach("package:metaheuristicOpt", unload=TRUE)
+# install.packages("/home/misha/Documents/Development/Software/metaheuristicOpt-master/", repos = NULL, type = "source",force=TRUE)
 # devtools::install_github("mishashe/segmut")
 ```
 
@@ -50,6 +62,11 @@ library(stringi)
 library(ggplot2)
 library(plotrix)
 library(dfoptim)
+library(Rcpp)
+library(RcppArmadillo)
+library(metaheuristicOpt)
+library(roxygen2)
+Rcpp::sourceCpp(paste0("~/Documents/Development/segmut/src/improve.cpp"))
 options(warn=-1)
 ```
 To set parameters
@@ -72,13 +89,16 @@ This is a basic example which shows you how to find optimal number of breaks and
 
 To find optimal number of breaks
 ```{r find optimal number of breaks, message=FALSE, warning=FALSE}
-res <- suppressWarnings(getNumberBreaksChiSquare(muts,L=L,Kmin=Kmin))
+# getBestSingleBreak(muts, L, c(0,1995,L))
+# breaks0L <- doHS(muts, L)
+breaks0L <- improve(muts, L,c(0,L))
+# suppressWarnings(getNumberBreaksChiSquare(muts,L=L,Kmin=Kmin))
 
 ```
 
 To plot the results
 ```{r plot best results,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE}
-breaks0L <- sort(c(0,res,L))
+# breaks0L <- sort(c(0,res,L))
 colors <- brewer.pal(name="Paired", n=length(breaks0L)-1)
 par(mar=c(2,0,0,0))
 plot(muts,rep(0,length(muts)),pch=".", cex = 1.5,ylim=c(-0.06,0.01),ylab="",xlab="", axes=F)
@@ -92,6 +112,7 @@ for (i in 1:(length(breaks0L)-1))
 To plot the density results
 ```{r plot density results,fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
 ma <- stats::filter(1:L %in% muts, rep(1 / 200, 200), sides = 2,circular=FALSE)
+colors <- brewer.pal(name="Paired", n=length(breaks0L)-1)
 plot(ma)   
 axis(side=1, at=c(0,700,2000,3200,L))
 for (i in 1:(length(breaks0L)-1))
@@ -172,11 +193,9 @@ k <- 0
 for (i in order(-Ls))
 {
   k <- k+1
-  setTxtProgressBar(txtProgressBar(min = 0,max = length(Ls),style = 3,width = 50,char = "="), k)
   muts <- mutsS[[i]]
   L <- Ls[[i]]
-  breaks <- suppressWarnings(getNumberBreaksChiSquare(muts=muts,L=L,Kmin=Kmin))
-  breaks0L <- c(0,sort(breaks),L)
+  breaks0L <- improve(muts, L,c(0,L))
   for (j in 1:(length(breaks0L)-1))
   {
     Ks <- c(Ks, breaks0L[j+1]-breaks0L[j]+1)
@@ -289,17 +308,13 @@ ggplot(data=dat, aes(rV, mE)) +
 Segmenting using segmut package:
 ```{r human breaking to segments,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=8, fig.height=8}
 muts <- sort(read.table(paste0("/home/misha/Documents/Development/segmut/data/HG02715_1_1_250000000.txt"), header = FALSE, sep = "\t",row.names=NULL)$V1)
-muts <- muts[muts<1e6]
+muts <- muts[muts<1e7]
 L <- max(muts) + 1 
 Ks <- c()
 taus <- c()
 nmutsS <- c()
 start_time <- Sys.time()
-breaks <- suppressWarnings(getNumberBreaksChiSquare(muts=muts,L=L,Kmin=Kmin))
-gc()
-plot(breaks[3:length(breaks)])
-
-breaks0L <- c(0,sort(breaks),L)
+breaks0L <- improve(muts, L, c(0,L))
 for (j in 1:(length(breaks0L)-1))
 {
   Ks <- c(Ks, breaks0L[j+1]-breaks0L[j]+1)
@@ -312,7 +327,7 @@ print(end_time - start_time)
 colors <- rep(brewer.pal(name="Paired", n=8),round(length(breaks0L)/8+1))
 par(mar=c(2,0,0,0))
 
-plot(density(muts, bw = 1000))   
+plot(density(muts, bw = 100))   
 for (i in 1:(length(breaks0L)-1))
 {
   lines(c(breaks0L[i],breaks0L[i+1]),c(4e-8,4e-8),col=colors[i], lwd=5)

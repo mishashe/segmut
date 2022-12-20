@@ -4,7 +4,7 @@
 \alias{getChiSquare}
 \title{Chi statistics}
 \usage{
-getChiSquare(par, muts, L = max(muts) - min(muts) + 1, Kmin = 0)
+getChiSquare(par, muts, L = max(muts) - min(muts) + 1, Kmin = 0, parPrev = c())
 }
 \arguments{
 \item{par}{vector of breakpoints}

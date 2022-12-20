@@ -45,6 +45,19 @@ getBreaksChiSquare <- function(muts,L=max(muts)-min(muts)+1,Kmin=0,n=1,parPrev=c
             parallel=FALSE,
             monitor = FALSE,
             muts=muts,L=L,Kmin=Kmin,parPrev=parPrev)@solution
+
+  lower <- rep(Kmin,1)
+  upper <-  rep(L-Kmin,1)
+  start_time <- Sys.time()
+  res <- metaOpt(FUN=getChiSquare, optimType = "MAX", algorithm = "HS",
+                 numVar=2,
+                 rangeVar=data.frame(a=c(lower,upper)),
+                 control = list(), seed = NULL)$result
+  end_time <- Sys.time()
+  print(end_time - start_time)
+
+
+
   res <- sort(c(parPrev,res))
   suggestions <- matrix(res,nrow=1)
   res <- ga(type = "real-valued", fitness = getChiSquare,optim=FALSE,keepBest=FALSE,

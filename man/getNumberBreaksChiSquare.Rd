@@ -4,7 +4,12 @@
 \alias{getNumberBreaksChiSquare}
 \title{finds optimal number of breaks ChiSquare}
 \usage{
-getNumberBreaksChiSquare(muts, L = max(muts) - min(muts) + 1, Kmin = 0)
+getNumberBreaksChiSquare(
+  muts,
+  L = max(muts) - min(muts) + 1,
+  Kmin = 0,
+  nmax = 0
+)
 }
 \arguments{
 \item{muts}{vector of mutations locations}
