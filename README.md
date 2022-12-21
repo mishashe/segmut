@@ -17,6 +17,10 @@ significantly different mutations density.
 You can install the development version of segmut from
 [GitHub](https://github.com/) with:
 
+``` r
+devtools::install_github("mishashe/segmut")
+```
+
 To load necessary libraries:
 
 ``` r
@@ -54,7 +58,7 @@ breaks and their locations:
 To find optimal number of breaks
 
 ``` r
-breaks0L <- improve(muts, L,c(0,L))
+breaks0L <- improve(muts, L,c(0,L)) # this is the main function (improve) of the package
 ```
 
 To plot the results
@@ -86,7 +90,7 @@ for (i in 1:(length(breaks0L)-1))
 }
 ```
 
-<img src="man/figures/README-plot density results-1.png" width="100%" />
+<img src="man/figures/README-plot density results-1.png" width="50%" />
 
 ## Example with Escherichia coli (NZ_CP033020.1) vs. Salmonella enterica (NZ_AP026948) alignment
 
@@ -151,8 +155,8 @@ p <- ggplot(data=data.frame(Ls=Ls,block_divergences=block_divergences), aes(Ls, 
   ggExtra::ggMarginal(p, type = "histogram")
 ```
 
-<img src="man/figures/README-blocks-1.png" width="100%" /> In total
-there are 739 blocks with the total length of 1769587 bp.
+<img src="man/figures/README-blocks-1.png" width="50%" /> In total there
+are 739 blocks with the total length of 1769587 bp.
 
 ### Segmentation of the genomes
 
@@ -179,10 +183,10 @@ for (i in order(-Ls))
 taus <- nmutsS/Ks
 end_time <- Sys.time()
 print(end_time - start_time)
-#> Time difference of 0.208427 secs
+#> Time difference of 0.2209926 secs
 ```
 
-In total there are 2686 segments.
+In total there are 2697 segments.
 
 Plotting divergences and lengths of the segments:
 
@@ -197,7 +201,7 @@ p <- ggplot(data=data.frame(Ks=Ks,taus=taus), aes(Ks, taus)) +
   ggExtra::ggMarginal(p, type = "histogram")
 ```
 
-<img src="man/figures/README-plot segments-1.png" width="100%" />
+<img src="man/figures/README-plot segments-1.png" width="50%" />
 
 Calculating empirical and pseudotheoretical MLDs:
 
@@ -209,59 +213,36 @@ mE <- p$counts/diff(rB)
 
 rA <- 0:max(Ls+1)
 mPT <- rA*0
-mPT_noK <- rA*0
-mPT_nmuts <- rA*0
+
 for (ir in 1:length(rA)) 
 {
     mPT[ir] <- sum((Ks>rA[ir])*(2*taus+(Ks-rA[ir]-1)*taus^2)*exp(log(1-taus)*rA[ir]))
-    mPT_noK[ir] <- sum(((Ks)*taus^2)*exp(log(1-taus)*rA[ir]))
-    mPT_nmuts[ir] <- sum((Ks>rA[ir])*nmutsS*(nmutsS+1)/(Ks-nmutsS)*(1-rA[ir]/(Ks-nmutsS))^(nmutsS-1))
 }
 for (iK in 1:length(Ks)) 
 {
   mPT[Ks[iK]+1] <- mPT[Ks[iK]+1] + exp(log(1-taus[iK])*Ks[iK])
-  mPT_nmuts[Ks[iK]+1] <- mPT_nmuts[Ks[iK]+1] + (nmutsS[iK]==0)
 }
 p <- weighted.hist(rA,w=mPT,breaks=rB,plot=FALSE)
 mPT <- p$counts/diff(rB)
-p <- weighted.hist(rA,w=mPT_noK,breaks=rB,plot=FALSE)
-mPT_noK <- p$counts/diff(rB)
-p <- weighted.hist(rA,w=mPT_nmuts,breaks=rB,plot=FALSE)
-mPT_nmuts <- p$counts/diff(rB)
 
 
-mBlocks <- rA*0
-for (ir in 1:length(rA)) 
-{
-  mBlocks[ir] <- sum((Ls>rA[ir])*(2*block_divergences+(Ls-rA[ir]-1)*block_divergences^2)*exp(log(1-block_divergences)*rA[ir]))
-}
-for (iL in 1:length(Ls)) 
-{
-  mBlocks[Ls[iL]+1] <- mBlocks[Ls[iL]+1] + exp(log(1-block_divergences[iL])*Ls[iL])
-}
-p <- weighted.hist(rA,w=mBlocks,breaks=rB,plot=FALSE)
-mBlocks <- p$counts/diff(rB)
 
 Ktot <- sum(Ls)
 mExp <- (2*divergence+(Ktot-rA)*divergence^2)*(1-divergence)^(rA)
 p <- weighted.hist(rA,w=mExp,breaks=rB,plot=FALSE)
 mExp <- p$counts/diff(rB)
 
-dat <- data.frame(rV=rV,mE=mE,mPT=mPT, mExp=mExp,mBlocks=mBlocks,mPT_noK=mPT_noK,mPT_nmuts=mPT_nmuts)
+dat <- data.frame(rV=rV,mE=mE,mPT=mPT, mExp=mExp)
 ```
 
 Plotting empirical and pseudotheoretical MLDs:
 
 ``` r
 ggplot(data=dat, aes(rV, mE)) + 
-          geom_line(aes(rV, mPT),col="blue", size=1) +
-          # geom_line(aes(rV, mPT_noK),col="blue", size=0.5,linetype = "dashed") +
-          # geom_line(aes(rV, mPT_nmuts),col="orange", size=1,linetype = "solid") +
-          # geom_line(aes(rV, mExp),col="grey", size=0.5,linetype = "solid") +
-          # geom_line(aes(rV, mBlocks),col="red", size=0.2) +
-          # geom_line(aes(rV, m_PT_numeric),col="green", size=0.2) +
-          scale_x_continuous(limits = c(1e0, 1e5),trans='log10',breaks = 10^(-10:10), labels = trans_format("log10", math_format(10^.x))) +
-          scale_y_continuous(limits = c(1e-8, 1e5),trans='log10',breaks = 10^(-10:10), labels = trans_format("log10", math_format(10^.x))) +
+          geom_line(aes(rV, mExp),col="grey", size=0.5) +
+          geom_line(aes(rV, mPT),col="blue", size=0.7) +
+          scale_x_continuous(limits = c(1e0, 3e3),trans='log10',breaks = 10^(-10:10), labels = trans_format("log10", math_format(10^.x))) +
+          scale_y_continuous(limits = c(1e-4, 1e5),trans='log10',breaks = 10^(-10:10), labels = trans_format("log10", math_format(10^.x))) +
           geom_line(aes(rV,1e8/rV^3),linetype = "dashed") + 
           geom_line(aes(rV,1e11/rV^4),linetype = "dotted") + 
           geom_point(size=4,shape='o') +
@@ -278,7 +259,7 @@ ggplot(data=dat, aes(rV, mE)) +
         halign = 0))
 ```
 
-<img src="man/figures/README-mld-1.png" width="100%" />
+<img src="man/figures/README-mld-1.png" width="50%" />
 
 ## Segmentation of the human genome (chr1)
 
@@ -288,6 +269,7 @@ Segmenting using segmut package:
 muts <- sort(read.table(paste0("/home/misha/Documents/Development/segmut/data/HG02715_1_1_250000000.txt"), header = FALSE, sep = "\t",row.names=NULL)$V1)
 muts <- muts[muts<1e7]
 L <- max(muts) + 1 
+divergence <- length(muts)/L
 Ks <- c()
 taus <- c()
 nmutsS <- c()
@@ -301,7 +283,7 @@ for (j in 1:(length(breaks0L)-1))
 taus <- nmutsS/Ks
 end_time <- Sys.time()
 print(end_time - start_time)
-#> Time difference of 1.635481 mins
+#> Time difference of 1.628502 mins
 
 colors <- rep(brewer.pal(name="Paired", n=8),round(length(breaks0L)/8+1))
 par(mar=c(2,0,0,0))
@@ -313,7 +295,7 @@ for (i in 1:(length(breaks0L)-1))
 }
 ```
 
-<img src="man/figures/README-human breaking to segments-1.png" width="100%" />
+<img src="man/figures/README-human breaking to segments-1.png" width="50%" />
 
 Calculating empirical and pseudotheoretical MLDs:
 
@@ -339,24 +321,22 @@ p <- weighted.hist(rA,w=mPT,breaks=rB,plot=FALSE)
 mPT <- p$counts/diff(rB)
 
 
+mExp <- (2*divergence+(L-rA)*divergence^2)*(1-divergence)^(rA)
+p <- weighted.hist(rA,w=mExp,breaks=rB,plot=FALSE)
+mExp <- p$counts/diff(rB)
 
-dat <- data.frame(rV=rV,mE=mE,mPT=mPT)
+dat <- data.frame(rV=rV,mE=mE,mPT=mPT,mExp=mExp)
 ```
 
 Plotting empirical and pseudotheoretical MLDs:
 
 ``` r
 ggplot(data=dat, aes(rV, mE)) + 
-          geom_line(aes(rV, mPT),col="blue", size=1) +
-          # geom_line(aes(rV, mPT_noK),col="blue", size=0.5,linetype = "dashed") +
-          # geom_line(aes(rV, mPT_nmuts),col="orange", size=1,linetype = "solid") +
-          # geom_line(aes(rV, mExp),col="grey", size=0.5,linetype = "solid") +
-          # geom_line(aes(rV, mBlocks),col="red", size=0.2) +
-          # geom_line(aes(rV, m_PT_numeric),col="green", size=0.2) +
+          geom_line(aes(rV, mExp),col="grey", size=0.7) +
+          geom_line(aes(rV, mPT),col="blue", size=0.7) +
           scale_x_continuous(limits = c(1e0, 1e5),trans='log10',breaks = 10^(-10:10), labels = trans_format("log10", math_format(10^.x))) +
-          scale_y_continuous(limits = c(1e-8, 1e5),trans='log10',breaks = 10^(-10:10), labels = trans_format("log10", math_format(10^.x))) +
-          geom_line(aes(rV,1e8/rV^3),linetype = "dashed") + 
-          geom_line(aes(rV,1e11/rV^4),linetype = "dotted") + 
+          scale_y_continuous(limits = c(2e-6, 1e2),trans='log10',breaks = 10^(-10:10), labels = trans_format("log10", math_format(10^.x))) +
+          geom_line(aes(rV,1e11/rV^3),linetype = "dashed") + 
           geom_point(size=4,shape='o') +
       labs(x="r", y = "m(r)",
        title="match length distribution",
@@ -371,4 +351,4 @@ ggplot(data=dat, aes(rV, mE)) +
         halign = 0))
 ```
 
-<img src="man/figures/README-mld chr1-1.png" width="100%" />
+<img src="man/figures/README-mld chr1-1.png" width="50%" />
