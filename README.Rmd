@@ -111,6 +111,7 @@ for (i in 1:(length(breaks0L)-1))
 }
 ```
 
+
 To plot the density results
 ```{r plot density results,fig.width=10, fig.height=5, message=FALSE, warning=FALSE, out.width="100%", out.height="50%"}
 ma <- stats::filter(1:L %in% muts, rep(1 / 200, 200), sides = 2,circular=FALSE)
@@ -182,6 +183,7 @@ p <- ggplot(data=data.frame(Ls=Ls,block_divergences=block_divergences), aes(Ls, 
           ylab("average block divergence") + xlab("block length") 
   ggExtra::ggMarginal(p, type = "histogram")
 ```
+
 In total there are `r length(Ls)` blocks with the total length of `r sum(Ls)` bp.
 
 ### Segmentation of the genomes
@@ -222,6 +224,8 @@ p <- ggplot(data=data.frame(Ks=Ks,taus=taus), aes(Ks, taus)) +
           geom_smooth(method="loess",se=TRUE) 
   ggExtra::ggMarginal(p, type = "histogram")
 ```
+
+
 
 Calculating empirical and pseudotheoretical MLDs: 
 ```{r calc mld ,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=2, fig.height=2}
@@ -305,12 +309,23 @@ print(end_time - start_time)
 
 colors <- rep(brewer.pal(name="Paired", n=8),round(length(breaks0L)/8+1))
 par(mar=c(2,0,0,0))
-
 plot(density(muts, bw = 100),main="")   
 for (i in 1:(length(breaks0L)-1))
 {
   lines(c(breaks0L[i],breaks0L[i+1]),c(4e-8,4e-8),col=colors[i], lwd=5)
 }
+```
+
+Plotting divergences and lengths of the human segments: 
+```{r plot human segments,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=5, fig.height=5, out.width="50%", out.height="50%"}
+p <- ggplot(data=data.frame(Ks=Ks[Ks>100],taus=taus[Ks>100]), aes(Ks, taus)) + 
+          geom_point(size=0.2) +
+          theme_bw() +
+          scale_x_continuous(trans='log10',breaks = 10^(-10:10), labels = trans_format("log10", math_format(10^.x))) +
+          scale_y_continuous(limits = c(0, 0.01)) +
+          ylab("segment divergence") + xlab("segment length") + 
+          geom_smooth(method="loess",se=TRUE) 
+  ggExtra::ggMarginal(p, type = "histogram")
 ```
 
 Calculating empirical and pseudotheoretical MLDs: 

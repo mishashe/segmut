@@ -156,6 +156,7 @@ p <- ggplot(data=data.frame(Ls=Ls,block_divergences=block_divergences), aes(Ls, 
 ```
 
 <img src="man/figures/README-blocks-1.png" width="50%" height="50%" />
+
 In total there are 739 blocks with the total length of 1769587 bp.
 
 ### Segmentation of the genomes
@@ -183,10 +184,10 @@ for (i in order(-Ls))
 taus <- nmutsS/Ks
 end_time <- Sys.time()
 print(end_time - start_time)
-#> Time difference of 0.2165151 secs
+#> Time difference of 0.2218208 secs
 ```
 
-In total there are 2686 segments.
+In total there are 2697 segments.
 
 Plotting divergences and lengths of the segments:
 
@@ -282,11 +283,10 @@ for (j in 1:(length(breaks0L)-1))
 taus <- nmutsS/Ks
 end_time <- Sys.time()
 print(end_time - start_time)
-#> Time difference of 1.610972 mins
+#> Time difference of 2.686884 mins
 
 colors <- rep(brewer.pal(name="Paired", n=8),round(length(breaks0L)/8+1))
 par(mar=c(2,0,0,0))
-
 plot(density(muts, bw = 100),main="")   
 for (i in 1:(length(breaks0L)-1))
 {
@@ -295,6 +295,21 @@ for (i in 1:(length(breaks0L)-1))
 ```
 
 <img src="man/figures/README-human breaking to segments-1.png" width="100%" />
+
+Plotting divergences and lengths of the human segments:
+
+``` r
+p <- ggplot(data=data.frame(Ks=Ks[Ks>100],taus=taus[Ks>100]), aes(Ks, taus)) + 
+          geom_point(size=0.2) +
+          theme_bw() +
+          scale_x_continuous(trans='log10',breaks = 10^(-10:10), labels = trans_format("log10", math_format(10^.x))) +
+          scale_y_continuous(limits = c(0, 0.01)) +
+          ylab("segment divergence") + xlab("segment length") + 
+          geom_smooth(method="loess",se=TRUE) 
+  ggExtra::ggMarginal(p, type = "histogram")
+```
+
+<img src="man/figures/README-plot human segments-1.png" width="50%" height="50%" />
 
 Calculating empirical and pseudotheoretical MLDs:
 
