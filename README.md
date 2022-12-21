@@ -1,6 +1,6 @@
 segmut
 ================
-2022-12-20
+2022-12-21
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
@@ -17,28 +17,10 @@ significantly different mutations density.
 You can install the development version of segmut from
 [GitHub](https://github.com/) with:
 
-``` r
-# setwd("/home/misha/Documents/Development/segmut/")
-# RcppArmadillo::RcppArmadillo.package.skeleton()
-# tools::package_native_routine_registration_skeleton(".", character_only = FALSE)
-# pkgbuild::compile_dll(".",force = T)
-# Rcpp::compileAttributes()
-# devtools::document()
-
-# detach("package:segmut", unload=TRUE)
-# install.packages("devtools")
-# Sys.unsetenv("GITHUB_PAT")
-# install.packages("/home/misha/Documents/Development/segmut/", repos = NULL, type = "source",force=TRUE)
-# detach("package:metaheuristicOpt", unload=TRUE)
-# install.packages("/home/misha/Documents/Development/Software/metaheuristicOpt-master/", repos = NULL, type = "source",force=TRUE)
-# devtools::install_github("mishashe/segmut")
-```
-
-To load nessesary libraries:
+To load necessary libraries:
 
 ``` r
 library(segmut)
-library(GA, quietly=T) # to find optimal break points using differential evolution algorithm
 library(RColorBrewer, quietly=T) # to plot results
 library(stringr)
 library(tidyverse)
@@ -47,19 +29,10 @@ library(ggExtra)
 library(stringi)
 library(ggplot2)
 library(plotrix)
-library(dfoptim)
 library(Rcpp)
 library(RcppArmadillo)
-library(metaheuristicOpt)
 library(roxygen2)
-Rcpp::sourceCpp(paste0("~/Documents/Development/segmut/src/improve.cpp"))
 options(warn=-1)
-```
-
-To set parameters
-
-``` r
-Kmin <- 30
 ```
 
 To generate example of genome of length `L` with vector of mutation
@@ -81,10 +54,7 @@ breaks and their locations:
 To find optimal number of breaks
 
 ``` r
-# getBestSingleBreak(muts, L, c(0,1995,L))
-# breaks0L <- doHS(muts, L)
 breaks0L <- improve(muts, L,c(0,L))
-# suppressWarnings(getNumberBreaksChiSquare(muts,L=L,Kmin=Kmin))
 ```
 
 To plot the results
@@ -209,10 +179,10 @@ for (i in order(-Ls))
 taus <- nmutsS/Ks
 end_time <- Sys.time()
 print(end_time - start_time)
-#> Time difference of 0.2161784 secs
+#> Time difference of 0.208427 secs
 ```
 
-In total there are 2690 segments.
+In total there are 2686 segments.
 
 Plotting divergences and lengths of the segments:
 
@@ -331,7 +301,7 @@ for (j in 1:(length(breaks0L)-1))
 taus <- nmutsS/Ks
 end_time <- Sys.time()
 print(end_time - start_time)
-#> Time difference of 5.244588 mins
+#> Time difference of 1.635481 mins
 
 colors <- rep(brewer.pal(name="Paired", n=8),round(length(breaks0L)/8+1))
 par(mar=c(2,0,0,0))

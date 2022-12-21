@@ -31,6 +31,6 @@ getBestSingleBreak <- function(muts, L, parPrev) {
 #' @return breaks
 #' @export
 improve <- function(muts, L, par) {
-    .Call('_segmut_improve', PACKAGE = 'segmut', muts, L, par)
+    .Call('_segmut_improve', PACKAGE = 'segmut', muts, L=0, par=c(0,L))
 }
 
