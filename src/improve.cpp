@@ -97,8 +97,10 @@ long int getBestSingleBreak(arma::uvec& muts, double& L, arma::rowvec& parPrev)
 //' @param par breaks (including 0 and L)
 //' @return breaks
 // [[Rcpp::export]]
-arma::rowvec improve(arma::uvec& muts, double& L, arma::rowvec par)
+arma::rowvec improve(arma::uvec& muts, double L=0, arma::rowvec par={})
 {
+  if (L==0) L = max(muts);
+  if (par.n_cols==0) par = {0,L};
   double lognmuts = log((double)muts.n_rows);
   double ChiSquareBest = -1000.0;
   int runs=0;
