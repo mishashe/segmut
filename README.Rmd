@@ -284,7 +284,7 @@ ggplot(data=dat, aes(rV, mE)) +
 
 ## Segmentation of the human genome (chr1)
 Segmenting using segmut package:
-```{r human breaking to segments,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=16, fig.height=4, out.width="50%",eval=TRUE}
+```{r human breaking to segments,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=16, fig.height=4, out.width="100%",eval=TRUE}
 muts <- sort(read.table(paste0("/home/misha/Documents/Development/segmut/data/HG02715_1_1_250000000.txt"), header = FALSE, sep = "\t",row.names=NULL)$V1)
 muts <- muts[muts<1e7]
 L <- max(muts) + 1 

@@ -183,10 +183,10 @@ for (i in order(-Ls))
 taus <- nmutsS/Ks
 end_time <- Sys.time()
 print(end_time - start_time)
-#> Time difference of 0.2139881 secs
+#> Time difference of 0.2165151 secs
 ```
 
-In total there are 2679 segments.
+In total there are 2686 segments.
 
 Plotting divergences and lengths of the segments:
 
@@ -282,7 +282,7 @@ for (j in 1:(length(breaks0L)-1))
 taus <- nmutsS/Ks
 end_time <- Sys.time()
 print(end_time - start_time)
-#> Time difference of 2.423536 mins
+#> Time difference of 1.610972 mins
 
 colors <- rep(brewer.pal(name="Paired", n=8),round(length(breaks0L)/8+1))
 par(mar=c(2,0,0,0))
@@ -294,7 +294,7 @@ for (i in 1:(length(breaks0L)-1))
 }
 ```
 
-<img src="man/figures/README-human breaking to segments-1.png" width="50%" />
+<img src="man/figures/README-human breaking to segments-1.png" width="100%" />
 
 Calculating empirical and pseudotheoretical MLDs:
 
