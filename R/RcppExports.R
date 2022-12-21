@@ -7,6 +7,7 @@
 #' @param L genome length
 #' @param par breaks (including 0 and L)
 #' @return breaks
+#' @export
 improve <- function(muts, L, par) {
     .Call('_segmut_improve', PACKAGE = 'segmut', muts, L, par)
 }

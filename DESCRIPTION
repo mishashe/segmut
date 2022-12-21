@@ -12,10 +12,6 @@ RoxygenNote: 7.2.3
 Suggests: 
     purrr
 Imports: 
-    DEoptim,
-    foreach,
-    optimx,
-    parallel,
     RColorBrewer,
     Rcpp,
     stats,
