@@ -1,17 +1,23 @@
-// #include <Rcpp.h>
+#include <RcppArmadillo.h>
 #include <iostream>
 #include <random>
 #include <chrono>
 #include <math.h>
 #include <stdint.h>
-
-// [[Rcpp::depends(RcppArmadillo)]]
 #define ARMA_WARN_LEVEL 0
-#include <RcppArmadillo.h>
-//using namespace Rcpp;
+using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
+
+//' function to get ChiSquare
+//'
+//' @param par vector of breaks
+//' @param muts mutations vector
+//' @param L genome length
+//' @return ChiSquare
+//' @export
+// [[Rcpp::export]]
 double getChiSquare(arma::rowvec par, arma::uvec& muts, double& L)
 {
   double chiSquare = 0;
@@ -35,6 +41,15 @@ double getChiSquare(arma::rowvec par, arma::uvec& muts, double& L)
   return(chiSquare);
 }
 
+
+//' function to get new best break
+//'
+//' @param muts vector of mutations
+//' @param L genome length
+//' @param parPrev exististing breaks (including 0 and L)
+//' @return new break
+//' @export
+// [[Rcpp::export]]
 long int getBestSingleBreak(arma::uvec& muts, double& L, arma::rowvec& parPrev)
 {
   double expected;
@@ -87,7 +102,7 @@ long int getBestSingleBreak(arma::uvec& muts, double& L, arma::rowvec& parPrev)
   return(xBest);
 }
 
-// [[Rcpp::depends(RcppArmadillo)]]
+
 
 
 //' function to improve the breaks.
@@ -96,8 +111,9 @@ long int getBestSingleBreak(arma::uvec& muts, double& L, arma::rowvec& parPrev)
 //' @param L genome length
 //' @param par breaks (including 0 and L)
 //' @return breaks
+//' @export
 // [[Rcpp::export]]
-arma::rowvec improve(arma::uvec& muts, double L=0, arma::rowvec par={})
+arma::rowvec improve(arma::uvec& muts, double L, arma::rowvec par)
 {
   if (L==0) L = max(muts);
   if (par.n_cols==0) par = {0,L};
