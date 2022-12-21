@@ -90,7 +90,7 @@ for (i in 1:(length(breaks0L)-1))
 }
 ```
 
-<img src="man/figures/README-plot density results-1.png" width="50%" />
+<img src="man/figures/README-plot density results-1.png" width="100%" height="50%" />
 
 ## Example with Escherichia coli (NZ_CP033020.1) vs. Salmonella enterica (NZ_AP026948) alignment
 
@@ -155,8 +155,8 @@ p <- ggplot(data=data.frame(Ls=Ls,block_divergences=block_divergences), aes(Ls, 
   ggExtra::ggMarginal(p, type = "histogram")
 ```
 
-<img src="man/figures/README-blocks-1.png" width="50%" /> In total there
-are 739 blocks with the total length of 1769587 bp.
+<img src="man/figures/README-blocks-1.png" width="50%" height="50%" />
+In total there are 739 blocks with the total length of 1769587 bp.
 
 ### Segmentation of the genomes
 
@@ -183,10 +183,10 @@ for (i in order(-Ls))
 taus <- nmutsS/Ks
 end_time <- Sys.time()
 print(end_time - start_time)
-#> Time difference of 0.2209926 secs
+#> Time difference of 0.2139881 secs
 ```
 
-In total there are 2697 segments.
+In total there are 2679 segments.
 
 Plotting divergences and lengths of the segments:
 
@@ -201,7 +201,7 @@ p <- ggplot(data=data.frame(Ks=Ks,taus=taus), aes(Ks, taus)) +
   ggExtra::ggMarginal(p, type = "histogram")
 ```
 
-<img src="man/figures/README-plot segments-1.png" width="50%" />
+<img src="man/figures/README-plot segments-1.png" width="50%" height="50%" />
 
 Calculating empirical and pseudotheoretical MLDs:
 
@@ -248,18 +248,17 @@ ggplot(data=dat, aes(rV, mE)) +
           geom_point(size=4,shape='o') +
       labs(x="r", y = "m(r)",
        title="match length distribution",
-       subtitle="subtitle",
-       caption="Here the circles correspond to the empirical MLD, grey line to the theoretical precition based on the average genome diversity, red line to the theoretical precition based on the average diversity of the alignment blocks, blue line to the theoretical precition based on the diversity of calculated segments. Dashed and dotted lines represent the -3 and -4 power-law accordingly.", width = 10) +
+       caption="Here the circles correspond to the empirical MLD, grey line to the theoretical precition based on the average genome diversity, blue line to the theoretical precition based on the diversity of calculated segments. Dashed and dotted lines represent the -3 and -4 power-law accordingly.", width = 40) +
             theme_bw() +
     theme(
     plot.caption =
       ggtext::element_textbox(
-        width = unit(.8, "npc"),
+        width = unit(1.0, "npc"),
         hjust = 0, vjust = 0,
         halign = 0))
 ```
 
-<img src="man/figures/README-mld-1.png" width="50%" />
+<img src="man/figures/README-mld-1.png" width="50%" height="50%" />
 
 ## Segmentation of the human genome (chr1)
 
@@ -283,12 +282,12 @@ for (j in 1:(length(breaks0L)-1))
 taus <- nmutsS/Ks
 end_time <- Sys.time()
 print(end_time - start_time)
-#> Time difference of 1.628502 mins
+#> Time difference of 2.423536 mins
 
 colors <- rep(brewer.pal(name="Paired", n=8),round(length(breaks0L)/8+1))
 par(mar=c(2,0,0,0))
 
-plot(density(muts, bw = 100))   
+plot(density(muts, bw = 100),main="")   
 for (i in 1:(length(breaks0L)-1))
 {
   lines(c(breaks0L[i],breaks0L[i+1]),c(4e-8,4e-8),col=colors[i], lwd=5)
@@ -340,13 +339,12 @@ ggplot(data=dat, aes(rV, mE)) +
           geom_point(size=4,shape='o') +
       labs(x="r", y = "m(r)",
        title="match length distribution",
-       subtitle="subtitle",
-       caption="Here the circles correspond to the empirical MLD, grey line to the theoretical precition based on the average genome diversity, red line to the theoretical precition based on the average diversity of the alignment blocks, blue line to the theoretical precition based on the diversity of calculated segments. Dashed and dotted lines represent the -3 and -4 power-law accordingly.", width = 10) +
+       caption="Here the circles correspond to the empirical MLD, grey line to the theoretical precition based on the average genome diversity, blue line to the theoretical precition based on the diversity of calculated segments. Dashed line represent the -3  power-law.", width = 40) +
             theme_bw() +
     theme(
     plot.caption =
       ggtext::element_textbox(
-        width = unit(.8, "npc"),
+        width = unit(1.0, "npc"),
         hjust = 0, vjust = 0,
         halign = 0))
 ```

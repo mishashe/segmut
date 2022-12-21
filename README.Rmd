@@ -112,7 +112,7 @@ for (i in 1:(length(breaks0L)-1))
 ```
 
 To plot the density results
-```{r plot density results,fig.width=5, fig.height=5, message=FALSE, warning=FALSE, out.width="50%"}
+```{r plot density results,fig.width=10, fig.height=5, message=FALSE, warning=FALSE, out.width="100%", out.height="50%"}
 ma <- stats::filter(1:L %in% muts, rep(1 / 200, 200), sides = 2,circular=FALSE)
 colors <- brewer.pal(name="Paired", n=length(breaks0L)-1)
 plot(ma)   
@@ -173,7 +173,7 @@ divergence <- sum(number_muts)/sum(Ls)
 
 ```
 Plotting divergences and lengths of the alignment blocks (not segmented ones): 
-```{r blocks, echo=TRUE, fig.height=5, fig.width=5, message=FALSE, warning=FALSE, out.width="50%"}
+```{r blocks, echo=TRUE, fig.height=5, fig.width=5, message=FALSE, warning=FALSE, out.width="50%", out.height="50%"}
 p <- ggplot(data=data.frame(Ls=Ls,block_divergences=block_divergences), aes(Ls, block_divergences)) + 
           geom_point(size=0.2) +
           theme_bw() +
@@ -212,7 +212,7 @@ In total there are `r length(Ks)` segments.
 
 
 Plotting divergences and lengths of the segments: 
-```{r plot segments,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=5, fig.height=5, out.width="50%"}
+```{r plot segments,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=5, fig.height=5, out.width="50%", out.height="50%"}
 p <- ggplot(data=data.frame(Ks=Ks,taus=taus), aes(Ks, taus)) + 
           geom_point(size=0.2) +
           theme_bw() +
@@ -259,7 +259,7 @@ dat <- data.frame(rV=rV,mE=mE,mPT=mPT, mExp=mExp)
 
 
 Plotting empirical and pseudotheoretical MLDs: 
-```{r mld,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=4, fig.height=4, out.width="50%"}
+```{r mld,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=4, fig.height=4, out.width="50%", out.height="50%"}
 ggplot(data=dat, aes(rV, mE)) + 
           geom_line(aes(rV, mExp),col="grey", size=0.5) +
           geom_line(aes(rV, mPT),col="blue", size=0.7) +
@@ -270,13 +270,12 @@ ggplot(data=dat, aes(rV, mE)) +
           geom_point(size=4,shape='o') +
       labs(x="r", y = "m(r)",
        title="match length distribution",
-       subtitle="subtitle",
-       caption="Here the circles correspond to the empirical MLD, grey line to the theoretical precition based on the average genome diversity, red line to the theoretical precition based on the average diversity of the alignment blocks, blue line to the theoretical precition based on the diversity of calculated segments. Dashed and dotted lines represent the -3 and -4 power-law accordingly.", width = 10) +
+       caption="Here the circles correspond to the empirical MLD, grey line to the theoretical precition based on the average genome diversity, blue line to the theoretical precition based on the diversity of calculated segments. Dashed and dotted lines represent the -3 and -4 power-law accordingly.", width = 40) +
             theme_bw() +
     theme(
     plot.caption =
       ggtext::element_textbox(
-        width = unit(.8, "npc"),
+        width = unit(1.0, "npc"),
         hjust = 0, vjust = 0,
         halign = 0))
 ```
@@ -285,7 +284,7 @@ ggplot(data=dat, aes(rV, mE)) +
 
 ## Segmentation of the human genome (chr1)
 Segmenting using segmut package:
-```{r human breaking to segments,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=8, fig.height=4, out.width="50%"}
+```{r human breaking to segments,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=16, fig.height=4, out.width="50%",eval=TRUE}
 muts <- sort(read.table(paste0("/home/misha/Documents/Development/segmut/data/HG02715_1_1_250000000.txt"), header = FALSE, sep = "\t",row.names=NULL)$V1)
 muts <- muts[muts<1e7]
 L <- max(muts) + 1 
@@ -307,7 +306,7 @@ print(end_time - start_time)
 colors <- rep(brewer.pal(name="Paired", n=8),round(length(breaks0L)/8+1))
 par(mar=c(2,0,0,0))
 
-plot(density(muts, bw = 100))   
+plot(density(muts, bw = 100),main="")   
 for (i in 1:(length(breaks0L)-1))
 {
   lines(c(breaks0L[i],breaks0L[i+1]),c(4e-8,4e-8),col=colors[i], lwd=5)
@@ -315,7 +314,7 @@ for (i in 1:(length(breaks0L)-1))
 ```
 
 Calculating empirical and pseudotheoretical MLDs: 
-```{r calc mld chr1 ,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=2, fig.height=2}
+```{r calc mld chr1 ,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=2, fig.height=2, eval=TRUE}
 r <- diff(muts)
 rB <- c(seq(-0.5,35.5,3),10^seq(log10(35.5)+0.1,7.8,0.1))
 rV <- 0.5*(rB[-length(rB)]+rB[-1])
@@ -359,13 +358,12 @@ ggplot(data=dat, aes(rV, mE)) +
           geom_point(size=4,shape='o') +
       labs(x="r", y = "m(r)",
        title="match length distribution",
-       subtitle="subtitle",
-       caption="Here the circles correspond to the empirical MLD, grey line to the theoretical precition based on the average genome diversity, red line to the theoretical precition based on the average diversity of the alignment blocks, blue line to the theoretical precition based on the diversity of calculated segments. Dashed and dotted lines represent the -3 and -4 power-law accordingly.", width = 10) +
+       caption="Here the circles correspond to the empirical MLD, grey line to the theoretical precition based on the average genome diversity, blue line to the theoretical precition based on the diversity of calculated segments. Dashed line represent the -3  power-law.", width = 40) +
             theme_bw() +
     theme(
     plot.caption =
       ggtext::element_textbox(
-        width = unit(.8, "npc"),
+        width = unit(1.0, "npc"),
         hjust = 0, vjust = 0,
         halign = 0))
 ```
