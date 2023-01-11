@@ -32,7 +32,7 @@ The goal of segmut is to segment genome with mutations to segments with signific
 
 You can install the development version of segmut from [GitHub](https://github.com/) with:
 
-``` {r install, include=TRUE, echo=TRUE, results='hide', message=FALSE, warning=FALSE,eval=FALSE}
+```{r install, include=TRUE, echo=TRUE, results='hide', message=FALSE, warning=FALSE,eval=FALSE}
 devtools::install_github("mishashe/segmut")
 ```
 
@@ -49,12 +49,12 @@ devtools::install_github("mishashe/segmut")
 # install.packages("devtools")
 # Sys.unsetenv("GITHUB_PAT")
 # install.packages("/home/misha/Documents/Development/segmut/", repos = NULL, type = "source",force=TRUE)
+# library(segmut)
 # devtools::install_github("mishashe/segmut")
 # usethis::use_r("RcppExports.R")
 # usethis::create_package(): creates the file structure for a new package
 # usethis::use_r(): creates R files
 # devtools::load_all(): loads all functions in a package like when a package is installed and attached with library()
-# usethis::use_package("/home/misha/Documents/Development/segmut/"): adds a package dependency to the DESCRIPTION file
 # usethis::use_data(): saves an object in the R session as a dataset in the package
 # devtools::document(): creates documentation files in man/ and the NAMESPACE file from roxygen2 code (it is a wrapper of roxygen2::roxygenize())
 # usethis::use_vignette(): creates a new vignette in vignettes/
@@ -62,8 +62,8 @@ devtools::install_github("mishashe/segmut")
 # devtools::install(): uses R CMD INSTALL to install a package
 ```
 
-
 To load necessary libraries:
+
 ```{r libraries, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
 library(segmut)
 library(RColorBrewer, quietly=T) # to plot results
@@ -80,7 +80,8 @@ library(roxygen2)
 options(warn=-1)
 ```
 
-To generate example of genome of length ```L``` with vector of mutation locations ```muts```:
+To generate example of genome of length `L` with vector of mutation locations `muts`:
+
 ```{r genome example, message=FALSE, warning=FALSE}
 L <- 4000
 muts <- sort(c(sample(1:700,700*0.1),
@@ -94,11 +95,13 @@ muts <- sort(c(sample(1:700,700*0.1),
 This is a basic example which shows you how to find optimal number of breaks and their locations:
 
 To find optimal number of breaks
+
 ```{r find optimal number of breaks, message=FALSE, warning=FALSE}
 breaks0L <- improve(muts, L,c(0,L)) # this is the main function (improve) of the package
 ```
 
 To plot the results
+
 ```{r plot best results,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE}
 # breaks0L <- sort(c(0,res,L))
 colors <- brewer.pal(name="Paired", n=length(breaks0L)-1)
@@ -111,8 +114,8 @@ for (i in 1:(length(breaks0L)-1))
 }
 ```
 
-
 To plot the density results
+
 ```{r plot density results,fig.width=10, fig.height=5, message=FALSE, warning=FALSE, out.width="100%", out.height="50%"}
 ma <- stats::filter(1:L %in% muts, rep(1 / 200, 200), sides = 2,circular=FALSE)
 colors <- brewer.pal(name="Paired", n=length(breaks0L)-1)
@@ -124,12 +127,12 @@ for (i in 1:(length(breaks0L)-1))
 }
 ```
 
-
 ## Example with Escherichia coli (NZ_CP033020.1) vs. Salmonella enterica (NZ_AP026948) alignment
 
 ### Alignment of the genomes
 
 We align two bacterial genomes using nucmer and get all the alignment blocks and the mutations
+
 ```{r alignment,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE}
 datadir <- "/home/misha/Documents/Development/segmut/data/"
 file1 <- paste0(datadir,"Escherichia_coli_1.fasta")
@@ -173,7 +176,9 @@ block_divergences <- number_muts/Ls
 divergence <- sum(number_muts)/sum(Ls)
 
 ```
-Plotting divergences and lengths of the alignment blocks (not segmented ones): 
+
+Plotting divergences and lengths of the alignment blocks (not segmented ones):
+
 ```{r blocks, echo=TRUE, fig.height=5, fig.width=5, message=FALSE, warning=FALSE, out.width="50%", out.height="50%"}
 p <- ggplot(data=data.frame(Ls=Ls,block_divergences=block_divergences), aes(Ls, block_divergences)) + 
           geom_point(size=0.2) +
@@ -187,7 +192,9 @@ p <- ggplot(data=data.frame(Ls=Ls,block_divergences=block_divergences), aes(Ls, 
 In total there are `r length(Ls)` blocks with the total length of `r sum(Ls)` bp.
 
 ### Segmentation of the genomes
+
 Segmenting the blocks using segmut package:
+
 ```{r breaking to segments,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=8, fig.height=8}
 Ks <- c()
 taus <- c()
@@ -210,10 +217,11 @@ taus <- nmutsS/Ks
 end_time <- Sys.time()
 print(end_time - start_time)
 ```
+
 In total there are `r length(Ks)` segments.
 
+Plotting divergences and lengths of the segments:
 
-Plotting divergences and lengths of the segments: 
 ```{r plot segments,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=5, fig.height=5, out.width="50%", out.height="50%"}
 p <- ggplot(data=data.frame(Ks=Ks,taus=taus), aes(Ks, taus)) + 
           geom_point(size=0.2) +
@@ -225,9 +233,8 @@ p <- ggplot(data=data.frame(Ks=Ks,taus=taus), aes(Ks, taus)) +
   ggExtra::ggMarginal(p, type = "histogram")
 ```
 
+Calculating empirical and pseudotheoretical MLDs:
 
-
-Calculating empirical and pseudotheoretical MLDs: 
 ```{r calc mld ,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=2, fig.height=2}
 rB <- c(seq(-0.5,35.5,3),10^seq(log10(35.5)+0.1,4.8,0.1))
 rV <- 0.5*(rB[-length(rB)]+rB[-1])
@@ -258,11 +265,8 @@ mExp <- p$counts/diff(rB)
 dat <- data.frame(rV=rV,mE=mE,mPT=mPT, mExp=mExp)
 ```
 
+Plotting empirical and pseudotheoretical MLDs:
 
-
-
-
-Plotting empirical and pseudotheoretical MLDs: 
 ```{r mld,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=4, fig.height=4, out.width="50%", out.height="50%"}
 ggplot(data=dat, aes(rV, mE)) + 
           geom_line(aes(rV, mExp),col="grey", size=0.5) +
@@ -284,10 +288,10 @@ ggplot(data=dat, aes(rV, mE)) +
         halign = 0))
 ```
 
-
-
 ## Segmentation of the human genome (chr1)
+
 Segmenting using segmut package:
+
 ```{r human breaking to segments,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=16, fig.height=4, out.width="100%",eval=TRUE}
 muts <- sort(read.table(paste0("/home/misha/Documents/Development/segmut/data/HG02715_1_1_250000000.txt"), header = FALSE, sep = "\t",row.names=NULL)$V1)
 muts <- muts[muts<1e7]
@@ -316,7 +320,8 @@ for (i in 1:(length(breaks0L)-1))
 }
 ```
 
-Plotting divergences and lengths of the human segments: 
+Plotting divergences and lengths of the human segments:
+
 ```{r plot human segments,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=5, fig.height=5, out.width="50%", out.height="50%"}
 p <- ggplot(data=data.frame(Ks=Ks[Ks>100],taus=taus[Ks>100]), aes(Ks, taus)) + 
           geom_point(size=0.2) +
@@ -328,7 +333,8 @@ p <- ggplot(data=data.frame(Ks=Ks[Ks>100],taus=taus[Ks>100]), aes(Ks, taus)) +
   ggExtra::ggMarginal(p, type = "histogram")
 ```
 
-Calculating empirical and pseudotheoretical MLDs: 
+Calculating empirical and pseudotheoretical MLDs:
+
 ```{r calc mld chr1 ,fig.width=10, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=2, fig.height=2, eval=TRUE}
 r <- diff(muts)
 rB <- c(seq(-0.5,35.5,3),10^seq(log10(35.5)+0.1,7.8,0.1))
@@ -358,11 +364,8 @@ mExp <- p$counts/diff(rB)
 dat <- data.frame(rV=rV,mE=mE,mPT=mPT,mExp=mExp)
 ```
 
+Plotting empirical and pseudotheoretical MLDs:
 
-
-
-
-Plotting empirical and pseudotheoretical MLDs: 
 ```{r mld chr1,fig.width=4, fig.height=0.5, echo=TRUE, message=FALSE, warning=FALSE,fig.width=4, fig.height=4, out.width="50%"}
 ggplot(data=dat, aes(rV, mE)) + 
           geom_line(aes(rV, mExp),col="grey", size=0.7) +

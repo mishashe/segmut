@@ -1,6 +1,6 @@
 segmut
 ================
-2022-12-21
+2023-01-11
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
@@ -184,10 +184,10 @@ for (i in order(-Ls))
 taus <- nmutsS/Ks
 end_time <- Sys.time()
 print(end_time - start_time)
-#> Time difference of 0.2218208 secs
+#> Time difference of 0.1772611 secs
 ```
 
-In total there are 2697 segments.
+In total there are 2265 segments.
 
 Plotting divergences and lengths of the segments:
 
@@ -283,7 +283,7 @@ for (j in 1:(length(breaks0L)-1))
 taus <- nmutsS/Ks
 end_time <- Sys.time()
 print(end_time - start_time)
-#> Time difference of 2.686884 mins
+#> Time difference of 1.226215 mins
 
 colors <- rep(brewer.pal(name="Paired", n=8),round(length(breaks0L)/8+1))
 par(mar=c(2,0,0,0))

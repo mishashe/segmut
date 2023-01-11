@@ -36,7 +36,7 @@ double getChiSquare(arma::rowvec par, arma::uvec& muts, double& L)
       imuts++;
     }
     expected = density*(par(ipar)-par(ipar-1)+1);
-    chiSquare += (nmuts - expected)*(nmuts - expected)/expected;
+    chiSquare += (nmuts - expected)*(nmuts - expected)/(1+expected);
   }
   return(chiSquare);
 }
@@ -88,9 +88,9 @@ long int getBestSingleBreak(arma::uvec& muts, double& L, arma::rowvec& parPrev)
       if (x > parPrev(ipar-1) + 10 && x < parPrev(ipar)-10 && nmuts>5)
       {
         expected1 = density*(x-parPrev(ipar-1)+1);
-        ChiSquare1 = (nmutsx - expected1)*(nmutsx - expected1)/expected1;
+        ChiSquare1 = (nmutsx - expected1)*(nmutsx - expected1)/(expected1 +1);
         expected2 = density*(parPrev(ipar) - x + 1);
-        ChiSquare2 = (nmuts - nmutsx - expected2)*(nmuts - nmutsx - expected2)/expected2;
+        ChiSquare2 = (nmuts - nmutsx - expected2)*(nmuts - nmutsx - expected2)/(expected2 + 1);
         if (ChiSquare1 + ChiSquare2 - ChiSquare > bestChiSquareDiff)
         {
           bestChiSquareDiff = ChiSquare1 + ChiSquare2 - ChiSquare;
